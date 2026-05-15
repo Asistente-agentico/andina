@@ -10,6 +10,9 @@ metadata:
   cliente_id: minera_prueba
   descripcion: Mediciones ambientales de polvo respirable por área de planta minera
 
+chunks:
+  valido_hasta_default: -1   # -1 = sin expiración (sentinel)
+
 hashing:
   rules:
     algoritmo: sha256_truncado_16
@@ -39,3 +42,30 @@ dimensiones_de_gobernanza:
     valores:
       - interno
       - restringido
+
+smoke_test_contract:
+  campos_requeridos_obligatorio: true
+
+chunk_contract:
+  campos_planos:
+    - chunk_id
+    - regla_id
+    - fecha_creacion
+    - corrida_id
+    - transform_hash
+    - dimensiones
+    - dimensiones_en_texto
+    - valido_hasta
+    - politica_vigencia
+    - pii_estrategia
+    - pii_tokens
+    - estrategia_olvido
+    - hash_contenido
+    - firma_hmac
+  campos_cifrados:
+    bloque: cifrado
+    campos:
+      - texto
+      - datos_negocio
+      - dek_cifrada
+      - kek_version

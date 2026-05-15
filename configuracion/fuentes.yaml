@@ -1,0 +1,12 @@
+# Mapeo de tablas landing → archivos CSV
+# Leído por diseno/scripts/init_duckdb.py
+fuentes:
+  mediciones_prechancado:           "Prechancado.csv"
+  mediciones_chancado_2_3:          "2_y_3.csv"
+  mediciones_terciario:             "Terciario.csv"
+  mediciones_cuaternario:           "Cuaternario.csv"
+  mediciones_molienda_sag:          "Molienda_Sag.csv"
+  mediciones_molienda_convencional: "Molienda_Convencional.csv"
+  mediciones_cdm_1:                 "CDM_(1).csv"
+  mediciones_cdm_2:                 "CDM_(2).csv"
+  mediciones_nodo:                  "Nodo.csv"

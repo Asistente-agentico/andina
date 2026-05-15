@@ -1,4 +1,37 @@
+# Datos del cliente — PII y archivos grandes
 datos/
+
+# Seeds con datos personales (PII)
+modelos/seeds/personas_alias.csv
+
+# dbt build artifacts
 modelos/target/
+modelos/logs/
 modelos/dbt_packages/
 
+# R session history
+.Rhistory
+analisis/.Rhistory
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# dbt — archivos locales del desarrollador
+modelos/profiles.yml
+modelos/.user.yml
+
+# Secretos locales
+.env
+*.secret
+secrets.yaml
+secrets.yml
+
+# Claves privadas y certificados
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert

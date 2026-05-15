@@ -10,7 +10,13 @@
     )
 }}
 
-WITH ranked AS (
+WITH limite_interno AS (
+    SELECT MIN(concentracion_min_mg_m3) AS mg_m3
+    FROM {{ ref('semaforo_polvo_respirable') }}
+    WHERE es_sobre_limite_interno = true
+),
+
+ranked AS (
     SELECT
         planta,
         punto_evaluacion,
@@ -63,21 +69,27 @@ con_personas AS (
 )
 
 SELECT
-    {{ pk_hash(['planta']) }}       AS chunk_id,
-    planta,
-    punto_evaluacion,
-    anio,
-    semana,
-    concentracion_mg_m3,
-    ROUND(concentracion_mg_m3 / 3.0, 2)    AS veces_sobre_limite,
-    fecha,
-    hora_inicio,
-    hora_termino,
-    operador,
-    operador_dni,
-    tecnico,
-    tecnico_dni,
-    3.0                             AS limite_legal_mg_m3,
-    'DS 594'                        AS norma
-FROM con_personas
-ORDER BY planta
+    cp.planta,
+    cp.punto_evaluacion,
+    cp.anio,
+    cp.semana,
+    cp.concentracion_mg_m3,
+    ROUND(cp.concentracion_mg_m3 / li.mg_m3, 2)    AS veces_sobre_limite,
+    cp.fecha,
+    cp.hora_inicio,
+    cp.hora_termino,
+    cp.operador,
+    cp.operador_dni,
+    cp.tecnico,
+    cp.tecnico_dni,
+    li.mg_m3                                        AS limite_interno_mg_m3,
+    s.nivel                                         AS nivel_semaforo,
+    s.color                                         AS color_semaforo,
+    s.etiqueta                                      AS etiqueta_semaforo
+FROM con_personas cp
+CROSS JOIN limite_interno li
+LEFT JOIN {{ ref('semaforo_polvo_respirable') }} s
+    ON cp.concentracion_mg_m3 >= s.concentracion_min_mg_m3
+    AND (cp.concentracion_mg_m3 < s.concentracion_max_mg_m3
+         OR s.concentracion_max_mg_m3 IS NULL)
+ORDER BY cp.planta
