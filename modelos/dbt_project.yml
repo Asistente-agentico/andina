@@ -6,8 +6,8 @@ profile: minera_prueba
 
 model-paths:    ["models"]
 macro-paths:    ["macros"]
-seed-paths:     ["seeds"]
-snapshot-paths: ["snapshots"]
+seed-paths:     ["semillas"]
+snapshot-paths: ["instantaneos"]
 target-path:    "target"
 clean-targets:  ["target", "dbt_packages"]
 

@@ -15,14 +15,14 @@ Compatible con: `asistente-agentico/diseno v0.5.0+`
 
 ```
 configuracion/
-  domain.yaml          — dimensiones de gobernanza y configuración del dominio
+  dominio.yaml         — dimensiones de gobernanza y configuración del dominio
   fuentes.yaml         — fuentes de datos del lakehouse del cliente
-  landing.yaml         — configuración de la zona de aterrizaje
+  aterrizaje.yaml      — configuración de la zona de aterrizaje
   reglas/
     reglas.yaml        — 4 reglas (P00001–P00004), una por pregunta de negocio
-  sql/
+  consultas/
     P000XX_M000XX.sql  — consulta al mart gold correspondiente (columnas explícitas)
-  templates/
+  plantillas/
     P000XX_M000XX.txt  — texto de respuesta con variables {campo}
 
 modelos/               — capa de transformación (interna; no expuesta al cliente)
@@ -32,8 +32,8 @@ modelos/               — capa de transformación (interna; no expuesta al clie
     silver/            — entidades, relaciones y detalles (append-only)
     oro/               — marts M00001–M00004 consumidos por las reglas
   macros/              — utilidades de hashing y transformación
-  snapshots/           — historial por fuente (una snapshot por planilla)
-  seeds/               — tablas de referencia (semáforo de límites)
+  instantaneos/        — historial por fuente (una instantánea por planilla)
+  semillas/            — tablas de referencia (semáforo de límites)
 
 analisis/
   preguntas.md         — contexto de negocio: preguntas, reglas y decisiones de diseño

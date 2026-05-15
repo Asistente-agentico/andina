@@ -1,0 +1,81 @@
+alias_fuente,dni,tipo_dni,dni_pais_emisor,nombre_completo,tipo_persona
+Alan,16234891-2,RUN,Chile,Alan Torres,tecnico
+Loreto,17456123-K,RUN,Chile,Loreto Fuentes,tecnico
+Jorge,15789234-5,RUN,Chile,Jorge Muñoz,tecnico
+Jose,18123456-7,RUN,Chile,José Sanchez,tecnico
+José,18123456-7,RUN,Chile,José Sanchez,tecnico
+Sanchez,18123456-7,RUN,Chile,José Sanchez,tecnico
+Cristian,19345678-9,RUN,Chile,Cristian Vera,tecnico
+Victor,14567890-3,RUN,Chile,Victor Ramos,tecnico
+Victor,14567890-3,RUN,Chile,Victor Ramos,tecnico
+Marco Rojas,16891234-K,RUN,Chile,Marco Rojas,operador
+Marcos Rojas,16891234-K,RUN,Chile,Marco Rojas,operador
+Marco Roja,16891234-K,RUN,Chile,Marco Rojas,operador
+Cristian Estay,17234567-8,RUN,Chile,Cristian Estay,operador
+Cesar Salgado,15678901-2,RUN,Chile,Cesar Salgado,operador
+Moises Tapia,18456789-K,RUN,Chile,Moises Tapia,operador
+Moises Tapìa,18456789-K,RUN,Chile,Moises Tapia,operador
+Leonel Gutierrez,14789012-3,RUN,Chile,Leonel Gutierrez,operador
+Leo Gutierrez,14789012-3,RUN,Chile,Leonel Gutierrez,operador
+Gabriel Espindola,17123456-9,RUN,Chile,Gabriel Espindola,operador
+Gabriel Espindiola,17123456-9,RUN,Chile,Gabriel Espindola,operador
+Cesar Casanova,16345678-4,RUN,Chile,Cesar Casanova,operador
+Rodrigo Madariaga,19567890-1,RUN,Chile,Rodrigo Madariaga,operador
+Alexis Castro,20123456-7,RUN,Chile,Alexis Castro,operador
+Jorge Aracena,15890123-K,RUN,Chile,Jorge Aracena,operador
+Eduardo Tejada,18234567-5,RUN,Chile,Eduardo Tejada,operador
+Mauricio Bruna,16678901-8,RUN,Chile,Mauricio Bruna,operador
+Freddy Astudillo,17901234-3,RUN,Chile,Freddy Astudillo,operador
+Fredy Astudillo,17901234-3,RUN,Chile,Freddy Astudillo,operador
+Jonathan Saavedra,19123456-K,RUN,Chile,Jonathan Saavedra,operador
+Jhonatan,19123456-K,RUN,Chile,Jonathan Saavedra,operador
+Miguel Perez,14345678-9,RUN,Chile,Miguel Perez,operador
+Nain Cortez,21567890-2,RUN,Chile,Nain Cortez,operador
+Nain Cortes,21567890-2,RUN,Chile,Nain Cortez,operador
+Ricardo Maturana,16789012-7,RUN,Chile,Ricardo Maturana,operador
+Ricardo Matrurana,16789012-7,RUN,Chile,Ricardo Maturana,operador
+Nelson Silva,18012345-4,RUN,Chile,Nelson Silva,operador
+Pablo Cortez,20234567-1,RUN,Chile,Pablo Cortez,operador
+Nicolas Salazar,17456789-8,RUN,Chile,Nicolas Salazar,operador
+Jorge Albornoz,15678234-5,RUN,Chile,Jorge Albornoz,operador
+Jorge Alvarado,19890123-K,RUN,Chile,Jorge Alvarado,operador
+Jorge Albarado,19890123-K,RUN,Chile,Jorge Alvarado,operador
+Mauricio Martinez,18678901-3,RUN,Chile,Mauricio Martinez,operador
+Mauricio Martines,18678901-3,RUN,Chile,Mauricio Martinez,operador
+Marcelo Alvarez,16012345-9,RUN,Chile,Marcelo Alvarez,operador
+Luis Muñoz,17890234-6,RUN,Chile,Luis Muñoz,operador
+Luis Yetsen,20456789-2,RUN,Chile,Luis Yetsen,operador
+Luis Jetsen,20456789-2,RUN,Chile,Luis Yetsen,operador
+Luis Molina,18901234-K,RUN,Chile,Luis Molina,operador
+Cristofer Ahumada,21234567-4,RUN,Chile,Cristofer Ahumada,operador
+Cristopher Ahumada,21234567-4,RUN,Chile,Cristofer Ahumada,operador
+Mirko Corvalan,19678901-5,RUN,Chile,Mirko Corvalan,operador
+Mirco Corvalan,19678901-5,RUN,Chile,Mirko Corvalan,operador
+Mirko Contreras,20789012-1,RUN,Chile,Mirko Contreras,operador
+Mario Saravia,18567890-7,RUN,Chile,Mario Saravia,operador
+Pedro Torres,15234567-8,RUN,Chile,Pedro Torres,operador
+Sergio Salinas,17012345-6,RUN,Chile,Sergio Salinas,operador
+Sergio Salina,17012345-6,RUN,Chile,Sergio Salinas,operador
+Sergio Sañinas,17012345-6,RUN,Chile,Sergio Salinas,operador
+Luis Gonzalez,16123456-1,RUN,Chile,Luis Gonzalez,operador
+Luis Gonzales,16123456-1,RUN,Chile,Luis Gonzalez,operador
+Franco Bruna,18789012-9,RUN,Chile,Franco Bruna,operador
+Sergio Pizarro,15901234-2,RUN,Chile,Sergio Pizarro,operador
+sergio Pizarro,15901234-2,RUN,Chile,Sergio Pizarro,operador
+Luis Rojas,19234567-3,RUN,Chile,Luis Rojas,operador
+Sergio Cruz,17567890-4,RUN,Chile,Sergio Cruz,operador
+Sergio,17567890-4,RUN,Chile,Sergio Cruz,operador
+Luis Villarroel,20678901-K,RUN,Chile,Luis Villarroel,operador
+Osvaldo Rivera,18345678-6,RUN,Chile,Osvaldo Rivera,operador
+Cristian Carvajal,21890123-8,RUN,Chile,Cristian Carvajal,operador
+Piero Becerra,16456789-5,RUN,Chile,Piero Becerra,operador
+Jorge Silva,19012345-7,RUN,Chile,Jorge Silva,operador
+Luis Vascuñan,17678901-1,RUN,Chile,Luis Vascuñan,operador
+Ismael Coroceo,15123456-K,RUN,Chile,Ismael Coroceo,operador
+Ismael Coroseo,15123456-K,RUN,Chile,Ismael Coroceo,operador
+Joel Lopez,20901234-3,RUN,Chile,Joel Lopez,operador
+Joel Liopez,20901234-3,RUN,Chile,Joel Lopez,operador
+Roberto Martinez,18890123-2,RUN,Chile,Roberto Martinez,operador
+Roberto Martines,18890123-2,RUN,Chile,Roberto Martinez,operador
+Roberto Zamora,16567890-K,RUN,Chile,Roberto Zamora,operador
+Felipe Carvallo,21012345-5,RUN,Chile,Felipe Carvallo,operador
