@@ -1,9 +1,9 @@
--- sat_medicion_detalle: atributos descriptivos de cada evento de medición
--- Historicidad DV2: append-only, unique_key = (pk_hash, valid_from).
+-- det_medicion: atributos descriptivos de cada evento de medición
+-- Historicidad: append-only, unique_key = (huella_registro, valid_from).
 {{
     config(
         materialized='incremental',
-        unique_key=['pk_hash', 'valid_from'],
+        unique_key=['huella_registro', 'valid_from'],
         incremental_strategy='append',
         tags=['capa:silver', 'dominio:minera_prueba']
     )
@@ -24,8 +24,8 @@ WITH src AS (
 
 con_hash AS (
     SELECT
-        {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana']) }}             AS pk_hash,
-        {{ diff_hash(['concentracion_mg_m3', 'fecha', 'hora_inicio', 'hora_termino']) }} AS _diff_hash,
+        {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana']) }}             AS huella_registro,
+        {{ huella_contenido(['concentracion_mg_m3', 'fecha', 'hora_inicio', 'hora_termino']) }} AS _huella_contenido,
         concentracion_mg_m3,
         fecha,
         hora_inicio,
@@ -40,8 +40,8 @@ con_hash AS (
 SELECT * FROM con_hash
 
 {% if is_incremental() %}
-WHERE _diff_hash NOT IN (
-    SELECT _diff_hash FROM {{ this }}
-    WHERE pk_hash IN (SELECT pk_hash FROM con_hash)
+WHERE _huella_contenido NOT IN (
+    SELECT _huella_contenido FROM {{ this }}
+    WHERE huella_registro IN (SELECT huella_registro FROM con_hash)
 )
 {% endif %}

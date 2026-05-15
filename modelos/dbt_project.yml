@@ -19,10 +19,10 @@ models:
     silver:
       +materialized: incremental
       +incremental_strategy: merge
-      +unique_key: pk_hash
+      +unique_key: huella_registro
       +tags: ["capa:silver", "dominio:minera_prueba"]
       detalles:
-        +unique_key: ["pk_hash", "valid_from"]
+        +unique_key: ["huella_registro", "valid_from"]
         +incremental_strategy: append
     oro:
       +tags: ["capa:oro", "dominio:minera_prueba"]

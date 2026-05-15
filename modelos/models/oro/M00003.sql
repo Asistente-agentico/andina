@@ -58,11 +58,11 @@ con_personas AS (
     LEFT JOIN {{ ref('personas_alias') }} op_a
         ON trim(p.operador_alias) = op_a.alias_fuente
     LEFT JOIN {{ ref('silver_entidad_persona') }} ep_op
-        ON {{ pk_hash(['op_a.dni', 'op_a.tipo_dni', 'op_a.dni_pais_emisor']) }} = ep_op.pk_hash
+        ON {{ huella_registro(['op_a.dni', 'op_a.tipo_dni', 'op_a.dni_pais_emisor']) }} = ep_op.huella_registro
     LEFT JOIN {{ ref('personas_alias') }} tc_a
         ON trim(p.tecnico_alias) = tc_a.alias_fuente
     LEFT JOIN {{ ref('silver_entidad_persona') }} ep_tc
-        ON {{ pk_hash(['tc_a.dni', 'tc_a.tipo_dni', 'tc_a.dni_pais_emisor']) }} = ep_tc.pk_hash
+        ON {{ huella_registro(['tc_a.dni', 'tc_a.tipo_dni', 'tc_a.dni_pais_emisor']) }} = ep_tc.huella_registro
     GROUP BY
         p.planta, p.punto_evaluacion, p.anio, p.semana,
         p.concentracion_mg_m3, p.fecha, p.hora_inicio, p.hora_termino

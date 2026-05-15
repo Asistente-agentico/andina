@@ -1,10 +1,10 @@
--- lnk_medicion_persona: vincula un evento de medición con las personas presentes
+-- rel_medicion_persona: vincula un evento de medición con las personas presentes
 -- Genera 2 filas por medición: una para operador, otra para técnico.
--- BK: lnk_medicion + hub_persona + rol
+-- BK: rel_medicion + ent_persona + rol
 {{
     config(
         materialized='incremental',
-        unique_key='pk_hash',
+        unique_key='huella_registro',
         incremental_strategy='merge',
         tags=['capa:silver', 'dominio:minera_prueba']
     )
@@ -64,21 +64,21 @@ unificado AS (
 )
 
 SELECT
-    {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana', 'rol', 'dni', 'tipo_dni', 'dni_pais_emisor']) }}    AS pk_hash,
-    {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana']) }}                                                  AS lnk_medicion_hk,
-    {{ pk_hash(['dni', 'tipo_dni', 'dni_pais_emisor']) }}                                                            AS hub_persona_hk,
+    {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana', 'rol', 'dni', 'tipo_dni', 'dni_pais_emisor']) }}    AS huella_registro,
+    {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana']) }}                                                  AS rel_medicion_hk,
+    {{ huella_registro(['dni', 'tipo_dni', 'dni_pais_emisor']) }}                                                            AS ent_persona_hk,
     planta,
     punto_evaluacion,
     anio,
     semana,
     rol,
     dni,
-    current_timestamp                                                                                               AS _silver_loaded_at,
-    'bronce_mediciones'                                                                                             AS _silver_fuente
+    current_timestamp                                                                                                        AS _silver_loaded_at,
+    'bronce_mediciones'                                                                                                      AS _silver_fuente
 
 FROM (SELECT DISTINCT * FROM unificado) t
 
 {% if is_incremental() %}
-WHERE {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana', 'rol', 'dni', 'tipo_dni', 'dni_pais_emisor']) }}
-    NOT IN (SELECT pk_hash FROM {{ this }})
+WHERE {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana', 'rol', 'dni', 'tipo_dni', 'dni_pais_emisor']) }}
+    NOT IN (SELECT huella_registro FROM {{ this }})
 {% endif %}

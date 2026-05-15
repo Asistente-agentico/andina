@@ -2,7 +2,7 @@
 
 ---
 **DECISIÓN DE DISEÑO — dimensiones_de_gobernanza**
-En el nuevo diseño, todas las dimensiones de etiquetado de chunks (`ambito`, `clasificacion`, `dominio` y cualquier otra) se declaran en `domain.yaml.dimensiones_de_gobernanza`, no como campos predefinidos del sistema.
+En el nuevo diseño, todas las dimensiones de etiquetado de chunks (`ambito`, `clasificacion`, `dominio` y cualquier otra) se declaran en `dominio.yaml.dimensiones_de_gobernanza`, no como campos predefinidos del sistema.
 Impacto en código: revisar D2 del HANDOFF, el schema de `reglas.yaml` (campo `dimensiones` y `payload`), el linter (V44/V45/V46) y la documentación del sistema de etiquetas. Requiere ADR.
 
 ---
@@ -12,18 +12,18 @@ No escala: cada semana se reprocesa el histórico completo y el CSV crece indefi
 Resolver en sprint futuro: evaluar Opción D (hash del archivo) o rediseñar la planilla en formato largo con columna timestamp para usar Camino B incremental.
 
 ---
-**MODELO DV2 PLATA — entidades identificadas**
+**MODELO PLATA — entidades identificadas**
 
-- `hub_persona` → BK compuesta: `dni` + `tipo_dni` + `dni_pais_emisor`
+- `ent_persona` → BK compuesta: `dni` + `tipo_dni` + `dni_pais_emisor`
   - Catálogo de referencia en `datos/referencia/personas.yaml` (gitignoreado, PII)
   - 6 técnicos (solo nombre de pila en fuente → normalizar via catálogo)
   - ~50 operadores (variantes ortográficas en fuente → normalizar via catálogo)
   - En producción: reemplazar por landing desde sistema HR/ERP del cliente
-- `hub_punto_medicion` → BK: `planta` + `punto_evaluacion`
-- `hub_sesion_medicion` → BK: `planta` + `semana`
-- `lnk_medicion` → hub_punto_medicion + hub_sesion_medicion
-- `sat_medicion_detalle` → concentracion_mg_m3, fecha, hora_inicio, hora_termino
-- `lnk_medicion_persona` (rol: operador/tecnico) → lnk_medicion + hub_persona
+- `ent_punto_medicion` → BK: `planta` + `punto_evaluacion`
+- `ent_sesion_medicion` → BK: `planta` + `semana`
+- `rel_medicion` → ent_punto_medicion + ent_sesion_medicion
+- `det_medicion` → concentracion_mg_m3, fecha, hora_inicio, hora_termino
+- `rel_medicion_persona` (rol: operador/tecnico) → rel_medicion + ent_persona
 
 ---
 
@@ -31,8 +31,8 @@ Resolver en sprint futuro: evaluar Opción D (hash del archivo) o rediseñar la 
 
 Cada regla tiene tres artefactos en `configuracion/`:
 - `reglas/reglas.yaml` — declaración YAML de la regla (identidad, chunk_id, privacidad, gobernanza, vigencia)
-- `sql/<regla_id>.sql` — consulta al mart gold con `{{ mart('<mart_id>') }}`; **sin `SELECT *`**, columnas explícitas
-- `templates/<regla_id>.txt` — texto con variables `{campo}`; cada `{campo}` debe estar en el `SELECT` del SQL
+- `consultas/<regla_id>.sql` — consulta al mart gold con `{{ mart('<mart_id>') }}`; **sin `SELECT *`**, columnas explícitas
+- `plantillas/<regla_id>.txt` — texto con variables `{campo}`; cada `{campo}` debe estar en el `SELECT` del SQL
 
 El mart en el nombre de la regla (`P00001_M00001` → `M00001`) debe coincidir con la referencia `{{ mart('M00001') }}` del SQL. Una regla lee de exactamente un mart.
 

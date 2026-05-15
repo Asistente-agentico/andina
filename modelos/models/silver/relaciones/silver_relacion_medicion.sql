@@ -1,24 +1,24 @@
--- lnk_medicion: vincula un punto de medición con una sesión semanal
--- BK compuesta: hub_punto_medicion + hub_sesion_medicion
+-- rel_medicion: vincula un punto de medición con una sesión semanal
+-- BK compuesta: ent_punto_medicion + ent_sesion_medicion
 {{
     config(
         materialized='incremental',
-        unique_key='pk_hash',
+        unique_key='huella_registro',
         incremental_strategy='merge',
         tags=['capa:silver', 'dominio:minera_prueba']
     )
 }}
 
 SELECT
-    {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana']) }}     AS pk_hash,
-    {{ pk_hash(['planta', 'punto_evaluacion']) }}                        AS hub_punto_medicion_hk,
-    {{ pk_hash(['planta', 'anio', 'semana']) }}                          AS hub_sesion_medicion_hk,
+    {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana']) }}     AS huella_registro,
+    {{ huella_registro(['planta', 'punto_evaluacion']) }}                        AS ent_punto_medicion_hk,
+    {{ huella_registro(['planta', 'anio', 'semana']) }}                          AS ent_sesion_medicion_hk,
     planta,
     punto_evaluacion,
     anio,
     semana,
-    current_timestamp                                                   AS _silver_loaded_at,
-    'bronce_mediciones'                                                 AS _silver_fuente
+    current_timestamp                                                            AS _silver_loaded_at,
+    'bronce_mediciones'                                                          AS _silver_fuente
 
 FROM (
     SELECT DISTINCT planta, punto_evaluacion, anio, semana
@@ -26,5 +26,5 @@ FROM (
 ) t
 
 {% if is_incremental() %}
-WHERE {{ pk_hash(['planta', 'punto_evaluacion', 'anio', 'semana']) }} NOT IN (SELECT pk_hash FROM {{ this }})
+WHERE {{ huella_registro(['planta', 'punto_evaluacion', 'anio', 'semana']) }} NOT IN (SELECT huella_registro FROM {{ this }})
 {% endif %}
