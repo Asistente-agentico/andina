@@ -38,7 +38,16 @@ modelos/               — capa de transformación (interna; no expuesta al clie
 analisis/
   preguntas.md         — contexto de negocio: preguntas, reglas y decisiones de diseño
 
+scripts/
+  preparar_landing.py  — extrae hojas del xlsx en formato ancho (etiqueta, column01…columnNN)
+  check_marts.py       — diagnóstico: cuenta filas en marts gold y silver
+  check_snapshots.py   — diagnóstico: cuenta filas y columnas en los snapshots
+
+tests/
+  e2e.yaml             — suite declarativa: 4 perfiles, 10 escenarios polvo respirable
+
 datos/                 — gitignoreado (PII + datos del cliente; solo en ambiente local)
+qdrant_data/           — gitignoreado (vector store local generado por chunker --embed)
 ```
 
 ---
@@ -89,7 +98,32 @@ El contenedor usa estas variables para configurar la conexión al lakehouse inte
 python -m scripts.lint_configuracion /ruta/a/minera/configuracion/reglas/reglas.yaml
 ```
 
-### Modelos de transformación
+### Pipeline de preparación (desde el xlsx del cliente)
+
+El pipeline convierte la planilla Excel de mediciones en chunks semánticos indexados
+en Qdrant. Ejecutar desde la imagen del producto o con las dependencias instaladas:
+
+```bash
+# 1. xlsx → CSVs en formato ancho (una fila por atributo, columnas column01…columnNN)
+python scripts/preparar_landing.py --raiz /ruta/a/minera
+
+# 2. CSVs → DuckDB (zona de aterrizaje)
+python scripts/init_duckdb.py --raiz /ruta/a/minera
+
+# 3. dbt: seeds → snapshots → modelos
+cd modelos
+dbt seed      # semillas (semáforo de límites, alias de personas)
+dbt snapshot  # captura histórico desde landing
+dbt run       # construye bronce → silver → oro (M00001–M00004)
+
+# 4. Chunker: marts gold → chunks cifrados → Qdrant
+python -m core.agentes.chunker --raiz /ruta/a/minera --embed
+```
+
+Requiere `modelos/profiles.yml` local (gitignoreado) y la variable de entorno
+`MASTER_SECRET` para el cifrado de chunks.
+
+### Modelos de transformación (solo)
 
 ```bash
 cd modelos
@@ -100,6 +134,22 @@ dbt test                  # validar constraints y freshness
 ```
 
 Requiere `modelos/profiles.yml` local (gitignoreado). Ver `.env.example` como referencia.
+
+### Tests E2E
+
+La suite declarativa en `tests/e2e.yaml` corre contra el pipeline completo del producto.
+Requiere que el Qdrant esté poblado (paso 4 del pipeline de preparación).
+
+```bash
+# Desde el repo del producto (Illari)
+export ILLARI_E2E_SUITE=/ruta/a/minera/tests/e2e.yaml
+export ILLARI_E2E_DOMINIO=/ruta/a/minera/configuracion/dominio.yaml
+export MASTER_SECRET=<mismo secreto usado en chunker --embed>
+pytest tests/e2e/ -v -m e2e
+```
+
+10 escenarios: 6 de negocio (4 preguntas × 2 perfiles), 2 de autenticación,
+1 de payload inválido, 1 sin match semántico.
 
 ---
 
