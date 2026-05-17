@@ -40,6 +40,7 @@ analisis/
 
 scripts/
   preparar_landing.py  — extrae hojas del xlsx en formato ancho (etiqueta, column01…columnNN)
+  run_e2e.ps1          — lanza la suite E2E y guarda el resultado en tests/results/
   check_marts.py       — diagnóstico: cuenta filas en marts gold y silver
   check_snapshots.py   — diagnóstico: cuenta filas y columnas en los snapshots
 
@@ -140,13 +141,22 @@ Requiere `modelos/profiles.yml` local (gitignoreado). Ver `.env.example` como re
 La suite declarativa en `tests/e2e.yaml` corre contra el pipeline completo del producto.
 Requiere que el Qdrant esté poblado (paso 4 del pipeline de preparación).
 
-```bash
-# Desde el repo del producto (Illari)
-export ILLARI_E2E_SUITE=/ruta/a/minera/tests/e2e.yaml
-export ILLARI_E2E_DOMINIO=/ruta/a/minera/configuracion/dominio.yaml
-export MASTER_SECRET=<mismo secreto usado en chunker --embed>
-pytest tests/e2e/ -v -m e2e
+```powershell
+# Desde la raíz del repo minera (Windows)
+$env:MASTER_SECRET = "<mismo secreto usado en chunker --embed>"
+.\scripts\run_e2e.ps1
 ```
+
+El script lee `suite`, `version` y el nombre del archivo YAML, ejecuta pytest
+dentro de la imagen Docker y guarda el resultado en:
+
+```
+tests/results/{suite}-v{version}-{timestamp}.txt
+```
+
+Por ejemplo: `tests/results/e2e-v1.0-20260517-164500.txt`
+
+El directorio `tests/results/` está gitignoreado.
 
 10 escenarios: 6 de negocio (4 preguntas × 2 perfiles), 2 de autenticación,
 1 de payload inválido, 1 sin match semántico.

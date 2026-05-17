@@ -16,6 +16,7 @@
 #   cliente (semaforo_polvo_respirable.csv, plantillas/P000XX_M000XX.txt).
 
 suite: minera
+version: "1.0"
 descripcion: "Polvo respirable DS 594 — 4 preguntas de negocio, 4 perfiles"
 
 perfiles:

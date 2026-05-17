@@ -4,6 +4,9 @@ datos/
 # Vector store local (generado por chunker --embed)
 qdrant_data/
 
+# Resultados de tests E2E (generados por scripts/run_e2e.ps1)
+tests/results/
+
 # Seeds con datos personales (PII)
 modelos/seeds/personas_alias.csv
 
