@@ -19,7 +19,7 @@ reglas:
     privacidad:
       pii_estrategia: tokens
       pii_tokens: [operador, tecnico]
-      estrategia_olvido: borrar_chunk
+      estrategia_olvido: etiqueta
 
     gobernanza:
       dimensiones:
