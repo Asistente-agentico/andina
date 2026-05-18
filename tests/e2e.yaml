@@ -26,14 +26,14 @@ perfiles:
     claims_dominio:
       planta: ["Molienda SAG"]
       ambito: ["seguridad_ocupacional"]
-      clasificacion: ["restringido"]
+      clasificacion: "restringido"
 
   - id: operador_chancado
     descripcion: "Operador de Pre-Chancado con acceso interno"
     claims_dominio:
       planta: ["Pre-Chancado"]
       ambito: ["seguridad_ocupacional"]
-      clasificacion: ["interno"]
+      clasificacion: "interno"
 
   - id: auditor_ambiental
     descripcion: "Auditor de seguridad ocupacional, acceso a todas las plantas"
@@ -48,7 +48,7 @@ perfiles:
         - CDM
         - "Nodo 3500"
       ambito: ["seguridad_ocupacional"]
-      clasificacion: ["restringido"]
+      clasificacion: "restringido"
 
   - id: tecnico_medioambiente
     descripcion: "Técnico de medioambiente, acceso a todas las plantas"
@@ -63,7 +63,7 @@ perfiles:
         - CDM
         - "Nodo 3500"
       ambito: ["medioambiente"]
-      clasificacion: ["interno"]
+      clasificacion: "interno"
 
 escenarios:
 
