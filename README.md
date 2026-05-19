@@ -45,7 +45,8 @@ scripts/
   check_snapshots.py   — diagnóstico: cuenta filas y columnas en los snapshots
 
 tests/
-  e2e.yaml             — suite declarativa: 4 perfiles, 10 escenarios polvo respirable
+  e2e_lectura.yaml     — suite E2E lectura (M2): 4 perfiles, 10 escenarios polvo respirable
+  e2e_escritura.yaml   — suite E2E escritura (M1→MV): conteo, gobernanza, PII, cifrado
 
 datos/                 — gitignoreado (PII + datos del cliente; solo en ambiente local)
 qdrant_data/           — gitignoreado (vector store local generado por chunker --embed)
@@ -138,8 +139,10 @@ Requiere `modelos/profiles.yml` local (gitignoreado). Ver `.env.example` como re
 
 ### Tests E2E
 
-La suite declarativa en `tests/e2e.yaml` corre contra el pipeline completo del producto.
-Requiere que el Qdrant esté poblado (paso 4 del pipeline de preparación).
+Dos suites complementarias:
+
+- **`tests/e2e_lectura.yaml`** (M2) — valida consultas RAG contra pipeline completo. Requiere que Qdrant esté poblado.
+- **`tests/e2e_escritura.yaml`** (M1→MV) — valida que el pipeline de escritura genere los chunks correctos.
 
 ```powershell
 # Desde la raíz del repo minera (Windows)

@@ -1,0 +1,82 @@
+# Suite E2E escritura — caso Minera
+# Dominio: seguridad ocupacional — concentración de polvo respirable (DS 594).
+#
+# Valida que el pipeline completo M1→MV produzca los chunks esperados:
+#   dbt (parse + test source + run) → chunker → cifrado AES-GCM → upsert Qdrant
+#
+# Ejecutar desde el repo Illari:
+#   export ILLARI_E2E_ESCRITURA=/ruta/a/minera/tests/e2e_escritura.yaml
+#   export ILLARI_E2E_RAIZ=/ruta/a/minera
+#   export MASTER_SECRET=<mismo secreto usado en chunker --embed>
+#   pytest tests/e2e/test_pipeline.py -v -m e2e
+#
+# O desde minera usando el script:
+#   bash scripts/run_e2e_escritura.sh
+#
+# Prerequisito: datos/minera.duckdb con seeds cargados (dbt seed ejecutado).
+
+suite: minera_escritura
+version: "1.0"
+descripcion: "Pipeline completo M1→MV: dbt + chunker + cifrado AES-GCM + upsert Qdrant"
+
+total:
+  min_chunks: 55   # 67 en dataset completo; margen para seeds parciales
+
+reglas:
+
+  # ── P00001_M00001 — Puntos sobre el límite esta semana ───────────────────
+  # 17 chunks en dataset completo (una fila por punto que supera 2.5 mg/m³).
+  # clasificacion=restringido porque incluye nombres de operador y técnico.
+  - regla_id: P00001_M00001
+    descripcion: "Puntos sobre límite esta semana"
+    min_chunks: 12
+    dimensiones_requeridas:
+      ambito: seguridad_ocupacional
+      clasificacion: restringido
+    pii_claves:
+      - operador
+      - tecnico
+    cifrado_activo: true
+
+  # ── P00002_M00002 — Resumen anual por área ───────────────────────────────
+  # 16 chunks en dataset completo (una fila por planta con estadísticas anuales).
+  # clasificacion=interno sin PII declarado: pii_tokens debe ser dict vacío.
+  - regla_id: P00002_M00002
+    descripcion: "Resumen anual por área"
+    min_chunks: 10
+    dimensiones_requeridas:
+      ambito: seguridad_ocupacional
+      clasificacion: interno
+    pii_claves: []
+    cifrado_activo: true
+
+  # ── P00003_M00003 — Condiciones del peak histórico ───────────────────────
+  # 8 chunks en dataset completo (una fila por planta con el máximo histórico).
+  # clasificacion=restringido con PII extendido: operador_dni y tecnico_dni
+  # adicionalmente a los nombres.
+  - regla_id: P00003_M00003
+    descripcion: "Peak histórico por planta"
+    min_chunks: 5
+    dimensiones_requeridas:
+      ambito: seguridad_ocupacional
+      clasificacion: restringido
+    pii_claves:
+      - operador
+      - operador_dni
+      - tecnico
+      - tecnico_dni
+    cifrado_activo: true
+
+  # ── P00004_M00004 — Última jornada de medición ───────────────────────────
+  # 26 chunks en dataset completo (todas las mediciones de la sesión más reciente).
+  # clasificacion=interno con PII básico (nombres sin DNI).
+  - regla_id: P00004_M00004
+    descripcion: "Última jornada de medición"
+    min_chunks: 15
+    dimensiones_requeridas:
+      ambito: seguridad_ocupacional
+      clasificacion: interno
+    pii_claves:
+      - operador
+      - tecnico
+    cifrado_activo: true

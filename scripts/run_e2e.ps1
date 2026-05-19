@@ -12,7 +12,7 @@
     respuesta para cada escenario. Nombre de archivo incluye sufijo "-dev".
 
 .PARAMETER Suite
-    Ruta al archivo YAML de la suite. Por defecto: tests/e2e.yaml
+    Ruta al archivo YAML de la suite. Por defecto: tests/e2e_lectura.yaml
 
 .PARAMETER MasterSecret
     MASTER_SECRET usado al indexar los chunks. Si no se pasa, se lee de la
@@ -27,11 +27,11 @@
 .EXAMPLE
     .\scripts\run_e2e.ps1
     .\scripts\run_e2e.ps1 -Dev
-    .\scripts\run_e2e.ps1 -Suite tests/e2e.yaml -MasterSecret "abc123..." -Dev
+    .\scripts\run_e2e.ps1 -Suite tests/e2e_lectura.yaml -MasterSecret "abc123..." -Dev
 #>
 
 param(
-    [string]$Suite        = "tests/e2e.yaml",
+    [string]$Suite        = "tests/e2e_lectura.yaml",
     [string]$MasterSecret = $env:MASTER_SECRET,
     [string]$Imagen       = "ghcr.io/asistente-agentico/illari:dev-0.6.4",
     [switch]$Dev

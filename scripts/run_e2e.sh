@@ -7,8 +7,8 @@
 # Uso:
 #   bash scripts/run_e2e.sh                         # modo normal
 #   bash scripts/run_e2e.sh --dev                   # verbose: detalle de chunks y respuestas
-#   bash scripts/run_e2e.sh tests/e2e.yaml          # suite explícita
-#   bash scripts/run_e2e.sh tests/e2e.yaml --dev    # suite + verbose
+#   bash scripts/run_e2e.sh tests/e2e_lectura.yaml          # suite explícita
+#   bash scripts/run_e2e.sh tests/e2e_lectura.yaml --dev    # suite + verbose
 #
 # Variables de entorno:
 #   MASTER_SECRET    — secreto de cifrado usado al indexar (obligatorio)
@@ -25,7 +25,7 @@ IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
 IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.6.6}"
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
-SUITE_REL="tests/e2e.yaml"
+SUITE_REL="tests/e2e_lectura.yaml"
 DEV=0
 
 # ---------------------------------------------------------------------------
@@ -136,7 +136,7 @@ fi
 docker run --rm \
     -v "${REPO_RAIZ}:/cliente/minera" \
     "${EXTRA_MOUNTS[@]+"${EXTRA_MOUNTS[@]}"}" \
-    -e "ILLARI_E2E_SUITE=/cliente/minera/tests/e2e.yaml" \
+    -e "ILLARI_E2E_SUITE=/cliente/minera/tests/e2e_lectura.yaml" \
     -e "ILLARI_E2E_DOMINIO=/cliente/minera/configuracion/dominio.yaml" \
     -e "MASTER_SECRET=${MASTER_SECRET}" \
     -e "ILLARI_E2E_VERBOSE=${VERBOSE_VAL}" \
