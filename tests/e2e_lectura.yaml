@@ -3,7 +3,7 @@
 #
 # Ejecutar desde el repo Illari:
 #   export ILLARI_E2E_SUITE=/ruta/a/minera/tests/e2e_lectura.yaml
-#   export ILLARI_E2E_DOMINIO=/ruta/a/minera/configuracion/dominio.yaml
+#   export ILLARI_E2E_CLIENTE=/ruta/a/minera
 #   export MASTER_SECRET=<mismo secreto usado en chunker --embed>
 #   pytest tests/e2e/ -v -m e2e
 #
@@ -49,7 +49,7 @@ escenarios:
   #   semáforo {etiqueta_semaforo} ({veces_sobre_limite}x el límite interno de
   #   {limite_interno_mg_m3} mg/m³) ..."
   # seed semaforo: etiqueta "peligroso" para nivel 4 (2.5–5.0 mg/m³)
-  - id: P1_sobre_limite_auditor
+  - id: P00001_M00001_sobre_limite_auditor
     perfil: auditor_ambiental
     texto: "¿Qué puntos superaron el límite permitido esta semana?"
     espera:
@@ -63,7 +63,7 @@ escenarios:
   # jefe_seguridad tiene planta=["Molienda SAG"]. Los chunks semánticamente
   # más similares son de otras plantas → governance falla-cerrado → 0 chunks.
   # Valida que el predicate de planta bloquea acceso fuera del ámbito asignado.
-  - id: P1_sobre_limite_jefe
+  - id: P00001_M00001_sobre_limite_jefe
     perfil: jefe_seguridad
     texto: "¿Qué puntos superaron el límite permitido esta semana?"
     espera:
@@ -77,7 +77,7 @@ escenarios:
   # Nota: para "historial del año" el motor retorna M00003 (peak histórico por planta)
   # como más similar semánticamente. M00002 (estadísticas anuales) no queda en el
   # top-10. Los términos validados son los que SÍ aparecen en los chunks devueltos.
-  - id: P2_resumen_anual
+  - id: P00002_M00002_resumen_anual
     perfil: auditor_ambiental
     texto: "¿Qué área tiene el peor historial del año?"
     espera:
@@ -92,7 +92,7 @@ escenarios:
   # Plantilla: "Concentración histórica máxima en planta {planta}: {concentracion_mg_m3}
   #   mg/m³ en punto ..."
   # pii_tokens: [operador, operador_dni, tecnico, tecnico_dni] → aparecen tokenizados
-  - id: P3_peak_historico
+  - id: P00003_M00003_peak_historico
     perfil: auditor_ambiental
     texto: "¿Qué estaba pasando cuando se midió la concentración más alta?"
     espera:
@@ -108,14 +108,14 @@ escenarios:
   #   {concentracion_mg_m3} mg/m³, semáforo {etiqueta_semaforo} ..."
   # operador_chancado tiene planta=["Pre-Chancado"]. Los chunks top-10 para
   # "última jornada" son de CDM/Chancado → governance falla-cerrado → 0 chunks.
-  - id: P4_ultima_jornada_operador
+  - id: P00004_M00004_ultima_jornada_operador
     perfil: operador_chancado
     texto: "¿Cómo fue la última jornada de medición?"
     espera:
       status: 200
       max_chunks: 0   # parte literal de la plantilla P00004_M00004.txt
 
-  - id: P4_ultima_jornada_auditor
+  - id: P00004_M00004_ultima_jornada_auditor
     perfil: auditor_ambiental
     texto: "¿Cómo fue la última jornada de medición?"
     espera:

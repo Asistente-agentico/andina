@@ -20,7 +20,7 @@
 
 suite: minera_escritura
 version: "1.0"
-descripcion: "Pipeline M1: dbt + chunker → chunks_generados.json validado por regla"
+descripcion: "Pipeline M1: dbt + chunker → chunks_generados_dev.json validado por regla"
 
 total:
   min_chunks: 55   # 67 en dataset completo; margen para seeds parciales
