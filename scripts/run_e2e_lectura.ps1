@@ -19,21 +19,21 @@
     variable de entorno MASTER_SECRET.
 
 .PARAMETER Imagen
-    Imagen Docker del producto. Por defecto: ghcr.io/asistente-agentico/illari:dev-0.6.2
+    Imagen Docker del producto. Por defecto: ghcr.io/asistente-agentico/illari:dev-0.7.0
 
 .PARAMETER Dev
     Activa modo verbose: imprime detalle de chunks y respuestas por escenario.
 
 .EXAMPLE
-    .\scripts\run_e2e.ps1
-    .\scripts\run_e2e.ps1 -Dev
-    .\scripts\run_e2e.ps1 -Suite tests/e2e_lectura.yaml -MasterSecret "abc123..." -Dev
+    .\scripts\run_e2e_lectura.ps1
+    .\scripts\run_e2e_lectura.ps1 -Dev
+    .\scripts\run_e2e_lectura.ps1 -Suite tests/e2e_lectura.yaml -MasterSecret "abc123..." -Dev
 #>
 
 param(
     [string]$Suite        = "tests/e2e_lectura.yaml",
     [string]$MasterSecret = $env:MASTER_SECRET,
-    [string]$Imagen       = "ghcr.io/asistente-agentico/illari:dev-0.6.4",
+    [string]$Imagen       = "ghcr.io/asistente-agentico/illari:dev-0.7.0",
     [switch]$Dev
 )
 
@@ -86,9 +86,8 @@ $outFile = Join-Path $outDir $outName
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 # -- Rutas dentro del contenedor --------------------------------------------
-$raizContenedor    = "/cliente/minera"
-$suiteContenedor   = "$raizContenedor/$(($Suite -replace '\\','/'))"
-$dominioContenedor = "$raizContenedor/configuracion/dominio.yaml"
+$raizContenedor  = "/cliente/minera"
+$suiteContenedor = "$raizContenedor/$(($Suite -replace '\\','/'))"
 
 # -- Flags pytest y env vars -------------------------------------------------
 $pytestFlags = if ($Dev) { "-v -s -m e2e" } else { "-v -m e2e" }
@@ -125,7 +124,7 @@ docker run --rm `
     -v "${repoRaiz}:/cliente/minera" `
     @devMount `
     -e "ILLARI_E2E_SUITE=$suiteContenedor" `
-    -e "ILLARI_E2E_DOMINIO=$dominioContenedor" `
+    -e "ILLARI_E2E_CLIENTE=$raizContenedor" `
     -e "MASTER_SECRET=$MasterSecret" `
     -e "ILLARI_E2E_VERBOSE=$verboseVal" `
     -w $raizContenedor `
