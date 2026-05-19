@@ -1,14 +1,17 @@
-# Suite E2E escritura — caso Minera
+# Suite E2E escritura (M1) — caso Minera
 # Dominio: seguridad ocupacional — concentración de polvo respirable (DS 594).
 #
-# Valida que el pipeline completo M1→MV produzca los chunks esperados:
-#   dbt (parse + test source + run) → chunker → cifrado AES-GCM → upsert Qdrant
+# Valida que el pipeline M1 (dbt + chunker) produzca los chunks esperados:
+#   dbt (parse + test source + snapshot + run + test) → generar_chunks_para_mv
+#
+# El cifrado AES-GCM y el upsert Qdrant los realiza MV al recibir los chunks.
+# La validación de almacenamiento en Qdrant queda diferida hasta que mk/ esté
+# incluido en la imagen Docker (deuda: Dockerfile sin COPY mk/).
 #
 # Ejecutar desde el repo Illari:
 #   export ILLARI_E2E_ESCRITURA=/ruta/a/minera/tests/e2e_escritura.yaml
 #   export ILLARI_E2E_RAIZ=/ruta/a/minera
-#   export MASTER_SECRET=<mismo secreto usado en chunker --embed>
-#   pytest tests/e2e/test_pipeline.py -v -m e2e
+#   pytest tests/e2e_escritura/test_pipeline.py -v -m e2e
 #
 # O desde minera usando el script:
 #   bash scripts/run_e2e_escritura.sh
@@ -17,7 +20,7 @@
 
 suite: minera_escritura
 version: "1.0"
-descripcion: "Pipeline completo M1→MV: dbt + chunker + cifrado AES-GCM + upsert Qdrant"
+descripcion: "Pipeline M1: dbt + chunker → chunks_generados.json validado por regla"
 
 total:
   min_chunks: 55   # 67 en dataset completo; margen para seeds parciales
@@ -36,7 +39,6 @@ reglas:
     pii_claves:
       - operador
       - tecnico
-    cifrado_activo: true
 
   # ── P00002_M00002 — Resumen anual por área ───────────────────────────────
   # 16 chunks en dataset completo (una fila por planta con estadísticas anuales).
@@ -48,7 +50,6 @@ reglas:
       ambito: seguridad_ocupacional
       clasificacion: interno
     pii_claves: []
-    cifrado_activo: true
 
   # ── P00003_M00003 — Condiciones del peak histórico ───────────────────────
   # 8 chunks en dataset completo (una fila por planta con el máximo histórico).
@@ -65,7 +66,6 @@ reglas:
       - operador_dni
       - tecnico
       - tecnico_dni
-    cifrado_activo: true
 
   # ── P00004_M00004 — Última jornada de medición ───────────────────────────
   # 26 chunks en dataset completo (todas las mediciones de la sesión más reciente).
@@ -79,4 +79,3 @@ reglas:
     pii_claves:
       - operador
       - tecnico
-    cifrado_activo: true

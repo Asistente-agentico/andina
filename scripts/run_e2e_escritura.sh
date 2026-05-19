@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# run_e2e_escritura.sh — Ejecuta el pipeline completo M1→MV y valida la salida.
+# run_e2e_escritura.sh — Ejecuta el pipeline M1 en Docker y valida la salida.
 #
 # Fases:
-#   1. Borrar qdrant_data/ (partida limpia — embeddings se regeneran desde cero).
-#   2. Docker: iniciar MV + ejecutar M1 CLI (dbt → chunker → cifrado → upsert Qdrant).
+#   1. Borrar qdrant_data/ (partida limpia para cuando se integre MV+MK).
+#   2. Docker: ejecutar M1 CLI (dbt → chunker → chunks_generados.json).
+#      MV no se inicia (mk/ no está en la imagen Docker aún — deuda pendiente).
+#      M1 escribe chunks_generados.json antes del intento a MV y continúa
+#      con degradación silenciosa si MV no responde.
 #   3. Local: pytest valida chunks_generados.json contra e2e_escritura.yaml.
 #
 # Uso:
@@ -11,10 +14,10 @@
 #   bash scripts/run_e2e_escritura.sh tests/e2e_escritura.yaml
 #
 # Variables de entorno:
-#   MASTER_SECRET  — secreto de cifrado (obligatorio; también se puede poner en .env)
-#   ILLARI_TAG     — tag de la imagen Docker (default: dev-0.6.6)
+#   ILLARI_TAG  — tag de la imagen Docker (default: dev-0.6.6)
 #
-# Prerequisito: datos/minera.duckdb con semillas cargadas (dbt seed ejecutado).
+# Nota: MASTER_SECRET no es necesario para este script. El orquestador M1
+# envía chunks en texto plano a MV; el cifrado lo hace MV (no M1).
 
 set -euo pipefail
 
@@ -35,23 +38,6 @@ for arg in "$@"; do
 done
 
 SUITE_ABS="${REPO_RAIZ}/${SUITE_REL}"
-
-# ---------------------------------------------------------------------------
-# Leer MASTER_SECRET (env > .env > error)
-# ---------------------------------------------------------------------------
-if [[ -z "${MASTER_SECRET:-}" ]]; then
-    ENV_FILE="${REPO_RAIZ}/.env"
-    if [[ -f "$ENV_FILE" ]]; then
-        MASTER_SECRET=$(grep -E '^\s*(export\s+)?MASTER_SECRET\s*=' "$ENV_FILE" \
-            | head -1 | sed -E 's/^\s*(export\s+)?MASTER_SECRET\s*=\s*//' | tr -d '"'"'" | xargs)
-    fi
-fi
-
-if [[ -z "${MASTER_SECRET:-}" ]]; then
-    echo "Error: MASTER_SECRET no definido." >&2
-    echo "Pásalo como variable de entorno o agrégalo al archivo .env del repo." >&2
-    exit 1
-fi
 
 # ---------------------------------------------------------------------------
 # Validar suite y dependencias
@@ -100,51 +86,27 @@ if [[ -d "$QDRANT_DIR" ]]; then
     rm -rf "$QDRANT_DIR"
     echo "  Eliminado: ${QDRANT_DIR}"
 else
-    echo "  No existe qdrant_data/, nada que limpiar."
+    echo "  qdrant_data/ no existe, nada que limpiar."
 fi
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 2 — Docker: MV (background) + M1 CLI
+# Fase 2 — Docker: M1 CLI (dbt + chunker → chunks_generados.json)
 # ---------------------------------------------------------------------------
-echo "[2/3] Ejecutando pipeline en Docker..."
+echo "[2/3] Ejecutando pipeline M1 en Docker..."
 echo "  Imagen: ${IMAGEN}"
+echo "  (MV no iniciado — mk/ no está en la imagen; MV se integra en próxima versión)"
 echo ""
 
 PIPELINE_CMD='
 pip install fastembed -q 2>/dev/null
-
-export CONFIGURACION_DIR=/cliente/minera/configuracion
-export MV_URL=http://localhost:8002
 export MINERA_DB_PATH=/cliente/minera/datos/minera.duckdb
-
-echo "  Iniciando MV en :8002..."
-uvicorn mv.api.main:app --host 0.0.0.0 --port 8002 --log-level warning &
-MV_PID=$!
-
-TIMEOUT=30
-ELAPSED=0
-until curl -sf http://localhost:8002/health > /dev/null 2>&1; do
-    sleep 1
-    ELAPSED=$((ELAPSED+1))
-    if [ "$ELAPSED" -ge "$TIMEOUT" ]; then
-        echo "Error: MV no respondió en ${TIMEOUT}s" >&2
-        kill "$MV_PID" 2>/dev/null || true
-        exit 1
-    fi
-done
-echo "  MV listo. Ejecutando pipeline M1..."
-
 python -m m1.core.orquestador.cli ejecutar \
     --config /cliente/minera/configuracion \
     --schemas /app/configuracion/schemas \
     --medallon /cliente/minera/modelos \
     --profiles-dir /cliente/minera/modelos \
     --raiz /cliente/minera
-EXIT_M1=$?
-
-kill "$MV_PID" 2>/dev/null || true
-exit $EXIT_M1
 '
 
 docker pull "${IMAGEN}"
@@ -152,7 +114,7 @@ echo ""
 
 docker run --rm \
     -v "${REPO_RAIZ}:/cliente/minera" \
-    -e "MASTER_SECRET=${MASTER_SECRET}" \
+    -e "MINERA_DB_PATH=/cliente/minera/datos/minera.duckdb" \
     --entrypoint sh \
     "${IMAGEN}" \
     -c "${PIPELINE_CMD}" \
@@ -164,6 +126,12 @@ if [[ $DOCKER_EXIT -ne 0 ]]; then
     echo ""
     echo "FAILED pipeline Docker (exit ${DOCKER_EXIT}) — ver: ${OUT_FILE}"
     exit "$DOCKER_EXIT"
+fi
+
+if [[ ! -f "${REPO_RAIZ}/datos/chunks_generados.json" ]]; then
+    echo ""
+    echo "FAILED: chunks_generados.json no fue generado por el pipeline." >&2
+    exit 1
 fi
 
 echo ""
