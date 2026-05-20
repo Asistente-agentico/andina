@@ -5,11 +5,11 @@
 .DESCRIPTION
     Tres fases:
       1. Borrar qdrant_data/ (partida limpia).
-      2. Docker: ejecutar M1 CLI (dbt → chunker → chunks_generados_dev.json).
-         MV no se inicia (mk/ pendiente de integración en imagen).
+      2. Docker: ejecutar M1 CLI (dbt -> chunker -> chunks_generados_dev.json).
+         MV no se inicia (mk/ pendiente de integracion en imagen).
       3. Local: pytest valida chunks_generados_dev.json contra e2e_escritura.yaml.
 
-    Nota: MASTER_SECRET no es necesario. M1 envía chunks en texto plano a MV;
+    Nota: MASTER_SECRET no es necesario. M1 envia chunks en texto plano a MV;
     el cifrado lo hace MV.
 
 .PARAMETER Suite
@@ -32,9 +32,9 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
 
 # -- Rutas ------------------------------------------------------------------
-$repoRaiz    = Split-Path -Parent $PSScriptRoot
-$suiteAbs    = Join-Path $repoRaiz $Suite
-$illariTests = Join-Path (Split-Path -Parent $repoRaiz) "Illari\tests"
+$repoRaiz     = Split-Path -Parent $PSScriptRoot
+$suiteAbs     = Join-Path $repoRaiz $Suite
+$illariTests  = Join-Path (Split-Path -Parent $repoRaiz) "Illari\tests"
 $testPipeline = Join-Path $illariTests "e2e_escritura\test_pipeline.py"
 
 # -- Validaciones previas ---------------------------------------------------
@@ -50,7 +50,7 @@ if (-not (Test-Path $duckdb)) {
 }
 
 if (-not (Test-Path $testPipeline)) {
-    Write-Error "test_pipeline.py no encontrado en $testPipeline`nVerifica que el repo Illari esté en $(Split-Path -Parent $repoRaiz)\Illari"
+    Write-Error "test_pipeline.py no encontrado en $testPipeline`nVerifica que el repo Illari este en $(Split-Path -Parent $repoRaiz)\Illari"
     exit 1
 }
 
@@ -61,7 +61,7 @@ $outFile = Join-Path $outDir "e2e_escritura-$ts.txt"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
 Write-Host ""
-Write-Host "=== Illari E2E escritura — minera ==="
+Write-Host "=== Illari E2E escritura -- minera ==="
 Write-Host "Suite  : $suiteAbs"
 Write-Host "Imagen : $Imagen"
 Write-Host "Output : $outFile"
@@ -78,22 +78,12 @@ if (Test-Path $qdrantDir) {
 }
 Write-Host ""
 
-# -- Fase 2: Docker — pipeline M1 -------------------------------------------
+# -- Fase 2: Docker -- pipeline M1 ------------------------------------------
 Write-Host "[2/3] Ejecutando pipeline M1 en Docker..."
-Write-Host "  (MV no iniciado — mk/ no está en la imagen; MV se integra en próxima versión)"
+Write-Host "  (MV no iniciado -- mk/ no esta en la imagen aun)"
 Write-Host ""
 
-$pipelineCmd = @"
-pip install fastembed -q 2>/dev/null
-export MINERA_DB_PATH=/cliente/minera/datos/minera.duckdb
-python -m m1.core.orquestador.cli ejecutar \
-    --dev \
-    --config /cliente/minera/configuracion \
-    --schemas /app/configuracion/schemas \
-    --medallon /cliente/minera/modelos \
-    --profiles-dir /cliente/minera/modelos \
-    --raiz /cliente/minera
-"@
+$pipelineCmd = "pip install fastembed -q 2>/dev/null; python -m m1.core.orquestador.cli ejecutar --dev --config /cliente/minera/configuracion --schemas /app/configuracion/schemas --medallon /cliente/minera/modelos --profiles-dir /cliente/minera/modelos --raiz /cliente/minera"
 
 New-Item -ItemType File -Force -Path $outFile | Out-Null
 
@@ -105,13 +95,13 @@ docker run --rm `
     --entrypoint sh `
     $Imagen `
     -c $pipelineCmd `
-    | ForEach-Object { $_; $_ | Out-File -FilePath $outFile -Encoding UTF8 -Append }
+    | ForEach-Object { Write-Host $_; $_ | Out-File -FilePath $outFile -Encoding UTF8 -Append }
 
 $dockerExit = $LASTEXITCODE
 
 if ($dockerExit -ne 0) {
     Write-Host ""
-    Write-Host "FAILED pipeline Docker (exit $dockerExit) — ver: $outFile" -ForegroundColor Red
+    Write-Host "FAILED pipeline Docker (exit $dockerExit) -- ver: $outFile" -ForegroundColor Red
     exit $dockerExit
 }
 
@@ -135,15 +125,15 @@ $env:ILLARI_E2E_RAIZ      = $repoRaiz
 
 python -m pytest $testPipeline -v -m e2e `
     --rootdir=(Join-Path $illariTests "..") `
-    | ForEach-Object { $_; $_ | Out-File -FilePath $outFile -Encoding UTF8 -Append }
+    | ForEach-Object { Write-Host $_; $_ | Out-File -FilePath $outFile -Encoding UTF8 -Append }
 
 $pytestExit = $LASTEXITCODE
 
 Write-Host ""
 if ($pytestExit -eq 0) {
-    Write-Host "PASSED — resultado guardado en: $outFile" -ForegroundColor Green
+    Write-Host "PASSED -- resultado guardado en: $outFile" -ForegroundColor Green
 } else {
-    Write-Host "FAILED (exit $pytestExit) — resultado guardado en: $outFile" -ForegroundColor Red
+    Write-Host "FAILED (exit $pytestExit) -- resultado guardado en: $outFile" -ForegroundColor Red
 }
 
 exit $pytestExit

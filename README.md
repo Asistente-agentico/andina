@@ -39,10 +39,11 @@ analisis/
   preguntas.md         — contexto de negocio: preguntas, reglas y decisiones de diseño
 
 scripts/
-  preparar_landing.py  — extrae hojas del xlsx en formato ancho (etiqueta, column01…columnNN)
-  run_e2e.ps1          — lanza la suite E2E y guarda el resultado en tests/results/
-  check_marts.py       — diagnóstico: cuenta filas en marts gold y silver
-  check_snapshots.py   — diagnóstico: cuenta filas y columnas en los snapshots
+  preparar_landing.py    — extrae hojas del xlsx en formato ancho (etiqueta, column01…columnNN)
+  run_e2e_lectura.ps1    — E2E completo lectura: MK+MV+M1 embed+M2 pytest en un contenedor
+  run_e2e_escritura.ps1  — E2E completo escritura: MK+MV+M1 embed, valida chunks en Qdrant
+  check_marts.py         — diagnóstico: cuenta filas en marts gold y silver
+  check_snapshots.py     — diagnóstico: cuenta filas y columnas en los snapshots
 
 tests/
   e2e_lectura.yaml     — suite E2E lectura (M2): 4 perfiles, 10 escenarios polvo respirable
@@ -139,30 +140,56 @@ Requiere `modelos/profiles.yml` local (gitignoreado). Ver `.env.example` como re
 
 ### Tests E2E
 
-Dos suites complementarias:
+Dos suites complementarias, cada una con su propio script. Ambos son pipelines
+**autocontenidos**: levantan todos los servicios dentro del contenedor, ejecutan
+los tests y los detienen. No requieren servicios externos en ejecución.
 
-- **`tests/e2e_lectura.yaml`** (M2) — valida consultas RAG contra pipeline completo. Requiere que Qdrant esté poblado.
-- **`tests/e2e_escritura.yaml`** (M1→MV) — valida que el pipeline de escritura genere los chunks correctos.
+#### Suite lectura — `run_e2e_lectura.ps1`
+
+Valida el pipeline RAG completo M1→MV→M2:
+- M1 embebe los marts gold y sube los chunks cifrados a Qdrant via MV.
+- M2 responde consultas del usuario consultando MV (búsqueda vectorial + gobernanza).
+
+**Prerequisito**: `datos/minera.duckdb` presente (`dbt seed && dbt run`).
 
 ```powershell
-# Desde la raíz del repo minera (Windows)
-$env:MASTER_SECRET = "<mismo secreto usado en chunker --embed>"
-.\scripts\run_e2e.ps1
+# Prerequisito: minera.duckdb debe existir
+# cd modelos && dbt seed && dbt run
+
+.\scripts\run_e2e_lectura.ps1 -Dev
+# -Dev: monta tests/ local de Illari + verbose pytest
 ```
 
-El script lee `suite`, `version` y el nombre del archivo YAML, ejecuta pytest
-dentro de la imagen Docker y guarda el resultado en:
+11 escenarios: 5 de negocio (P1×2 perfiles + P2 + P3 + P4), 2 de autenticación,
+1 de payload inválido, 1 sin match semántico, 2 de gobernanza (acceso denegado).
+
+#### Suite escritura — `run_e2e_escritura.ps1`
+
+Valida el pipeline de escritura M1→MV: conteo de chunks, gobernanza, PII y cifrado.
+
+```powershell
+.\scripts\run_e2e_escritura.ps1 -Dev
+```
+
+#### Resultado
+
+Ambos scripts guardan el resultado en:
 
 ```
-tests/results/{suite}-v{version}-{timestamp}.txt
+tests/results/{suite}-v{version}[-dev]-{timestamp}.txt
 ```
-
-Por ejemplo: `tests/results/e2e-v1.0-20260517-164500.txt`
 
 El directorio `tests/results/` está gitignoreado.
 
-10 escenarios: 6 de negocio (4 preguntas × 2 perfiles), 2 de autenticación,
-1 de payload inválido, 1 sin match semántico.
+#### Notas de implementación
+
+Los scripts montan el repo como bind-mount pero copian los datos del cliente a
+`/tmp/minera` (tmpfs nativo Linux) antes de arrancar Qdrant. Esto evita errores
+de bloqueo de archivos (`portalocker` falla sobre NTFS/9P de WSL2).
+
+El modelo de embeddings (`paraphrase-multilingual-MiniLM-L12-v2`) se pre-descarga
+en el contenedor antes de arrancar MV para garantizar que el health-check pase
+sin agotar los reintentos.
 
 ---
 
