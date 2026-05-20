@@ -35,9 +35,15 @@ services:
 
   mv-api:
     <<: *base
-    entrypoint: >
-      sh -c "pip install fastembed -q 2>/dev/null &&
-             uvicorn mv.api.main:app --host 0.0.0.0 --port 8002"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        pip install fastembed -q 2>/dev/null &&
+        uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
+    volumes:
+      - .:/cliente/minera
+      - fastembed_modelo:/home/asistente/.cache/fastembed
     depends_on:
       mk:
         condition: service_healthy
@@ -55,19 +61,29 @@ services:
 
   m1:
     <<: *base
-    entrypoint: >
-      sh -c "pip install fastembed -q 2>/dev/null &&
-             dbt seed --project-dir /cliente/minera/modelos
-                      --profiles-dir /cliente/minera/modelos &&
-             dbt run  --project-dir /cliente/minera/modelos
-                      --profiles-dir /cliente/minera/modelos &&
-             python -m m1.core.orquestador.cli ejecutar
-               --dev
-               --config /cliente/minera/configuracion
-               --schemas /app/configuracion/schemas
-               --medallon /cliente/minera/modelos
-               --profiles-dir /cliente/minera/modelos
-               --raiz /cliente/minera"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        python3 /cliente/minera/scripts/cargar_landing.py
+        --raiz /cliente/minera &&
+        pip install fastembed -q 2>/dev/null &&
+        dbt seed
+        --project-dir /cliente/minera/modelos
+        --profiles-dir /cliente/minera/modelos &&
+        dbt snapshot
+        --project-dir /cliente/minera/modelos
+        --profiles-dir /cliente/minera/modelos &&
+        dbt run
+        --project-dir /cliente/minera/modelos
+        --profiles-dir /cliente/minera/modelos &&
+        python -m m1.core.orquestador.cli ejecutar
+        --dev
+        --config /cliente/minera/configuracion
+        --schemas /app/configuracion/schemas
+        --medallon /cliente/minera/modelos
+        --profiles-dir /cliente/minera/modelos
+        --raiz /cliente/minera
     depends_on:
       mv-api:
         condition: service_healthy
@@ -80,3 +96,6 @@ services:
 networks:
   red_illari:
     driver: bridge
+
+volumes:
+  fastembed_modelo:

@@ -1,6 +1,9 @@
 llm:
-  proveedor: eco
-  modelo: eco-stub
+  proveedor: gemini
+  modelo: gemini-2.5-flash
+  temperatura: 0.3
+  max_tokens_respuesta: 2048
+  timeout_segundos: 60
 mv:
   base_url: http://mv-api:8002
   timeout_segundos: 60

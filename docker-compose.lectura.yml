@@ -38,12 +38,20 @@ services:
 
   mv-api:
     <<: *base
-    entrypoint: >
-      sh -c "pip install fastembed -q 2>/dev/null &&
-             uvicorn mv.api.main:app --host 0.0.0.0 --port 8002"
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        pip install fastembed -q 2>/dev/null &&
+        uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
+    volumes:
+      - .:/cliente/minera
+      - ./datos/fastembed_cache:/home/asistente/.cache
     depends_on:
       mk:
         condition: service_healthy
+    ports:
+      - "8002:8002"
     environment:
       MK_URL: "http://mk:8003"
       CLIENTE_DIR: /cliente/minera
@@ -53,8 +61,8 @@ services:
              "import urllib.request; urllib.request.urlopen('http://localhost:8002/health')"]
       interval: 5s
       timeout: 3s
-      retries: 12
-      start_period: 20s
+      retries: 24
+      start_period: 60s
 
   ma:
     <<: *base
@@ -79,15 +87,27 @@ services:
 
   m2:
     <<: *base
-    entrypoint: uvicorn m2.api.main:app --host 0.0.0.0 --port 8000
+    entrypoint:
+      - sh
+      - -c
+      - >-
+        if [ -n "${M2_PIP_EXTRA:-}" ]; then pip install ${M2_PIP_EXTRA} -q 2>/dev/null; fi &&
+        python -m m2.core.cli serve --dev --raiz /cliente/minera --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/cliente/minera
+      - ../Illari/m2/configuracion/schemas:/app/m2/configuracion/schemas:ro
+      - ../Illari/m2/core/adaptadores/llm/factory.py:/app/m2/core/adaptadores/llm/factory.py:ro
+      - ${CHAT_YAML:-./configuracion/chat.yaml}:/cliente/minera/configuracion/chat.yaml:ro
     depends_on:
       mv-api:
-        condition: service_healthy
+        condition: service_started
       ma:
         condition: service_healthy
     environment:
       CLIENTE_DIR: /cliente/minera
       MA_JWKS_URL: "http://ma:8001/jwks"
+      M2_PIP_EXTRA: ${M2_PIP_EXTRA:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     ports:
       - "8000:8000"
     healthcheck:
@@ -101,3 +121,4 @@ services:
 networks:
   red_illari:
     driver: bridge
+

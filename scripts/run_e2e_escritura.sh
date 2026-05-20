@@ -2,11 +2,11 @@
 # run_e2e_escritura.sh — Pipeline completo M1→MV→BDV y valida la salida.
 #
 # Fases:
-#   1. docker compose pull (antes de cualquier cambio destructivo).
-#   2. Limpiar datos/qdrant_mv/ y levantar MK + MV + M1 via docker compose.
-#      MK sirve las claves KEK a MV. MV cifra y persiste chunks en Qdrant.
-#      M1 escribe chunks_generados_dev.json (--dev) Y envía a MV.
-#   3. Local: pytest valida chunks_generados_dev.json contra e2e_escritura.yaml.
+#   1. Local: preparar_landing.py → CSVs en datos/csv/ desde el xlsx de mediciones.
+#   2. docker compose pull (antes de cualquier cambio destructivo).
+#   3. Limpiar datos/qdrant_mv/ y levantar MK + MV + M1 via docker compose.
+#      M1: cargar_landing.py → dbt seed → dbt snapshot → dbt run → orquestador.
+#   4. Local: pytest valida chunks_generados_dev.json contra e2e_escritura.yaml.
 #
 # Uso:
 #   bash scripts/run_e2e_escritura.sh
@@ -92,9 +92,16 @@ echo "Output : ${OUT_FILE}"
 echo ""
 
 # ---------------------------------------------------------------------------
+# Fase 0 — Preparar CSVs de landing desde el xlsx de mediciones
+# ---------------------------------------------------------------------------
+echo "[1/4] Preparando CSVs de landing..."
+python3 "${REPO_RAIZ}/scripts/preparar_landing.py" --raiz "${REPO_RAIZ}"
+echo ""
+
+# ---------------------------------------------------------------------------
 # Fase 1 — Descargar imagen (antes de cualquier cambio destructivo)
 # ---------------------------------------------------------------------------
-echo "[1/3] Descargando imagen Docker..."
+echo "[2/4] Descargando imagen Docker..."
 ILLARI_TAG="${ILLARI_TAG:-dev-0.7.1}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
@@ -103,7 +110,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Fase 2 — Limpiar BDV y ejecutar pipeline MK + MV + M1
 # ---------------------------------------------------------------------------
-echo "[2/3] Ejecutando pipeline MK → MV → M1 via docker compose..."
+echo "[3/4] Ejecutando pipeline MK → MV → M1 via docker compose..."
 echo ""
 
 QDRANT_DIR="${REPO_RAIZ}/datos/qdrant_mv"
@@ -114,7 +121,15 @@ if [[ -d "$QDRANT_DIR" ]]; then
 else
     echo "  datos/qdrant_mv/ no existe, nada que limpiar."
 fi
+
+echo "  Pre-creando colección Qdrant (el contenedor MV escribe, no crea)..."
+python3 "${REPO_RAIZ}/scripts/preparar_bdv.py" --raiz "${REPO_RAIZ}"
 echo ""
+
+# Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.1}" \
+MASTER_SECRET="${MASTER_SECRET}" \
+docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
 ILLARI_TAG="${ILLARI_TAG:-dev-0.7.1}" \
 MASTER_SECRET="${MASTER_SECRET}" \
@@ -141,6 +156,12 @@ if [[ ! -f "${REPO_RAIZ}/datos/chunks_generados_dev.json" ]]; then
     exit 1
 fi
 
+if [[ ! -d "${REPO_RAIZ}/datos/qdrant_mv" ]] || [[ -z "$(ls -A "${REPO_RAIZ}/datos/qdrant_mv" 2>/dev/null)" ]]; then
+    echo ""
+    echo "FAILED: datos/qdrant_mv/ vacío o inexistente — MV no indexó los chunks." >&2
+    exit 1
+fi
+
 echo ""
 echo "  Pipeline completado. chunks_generados_dev.json generado y chunks en BDV."
 echo ""
@@ -148,7 +169,7 @@ echo ""
 # ---------------------------------------------------------------------------
 # Fase 3 — Validación local con pytest
 # ---------------------------------------------------------------------------
-echo "[3/3] Validando chunks_generados_dev.json con pytest..."
+echo "[4/4] Validando chunks con pytest (JSON + BDV)..."
 echo ""
 
 ILLARI_E2E_ESCRITURA="${SUITE_ABS}" \
