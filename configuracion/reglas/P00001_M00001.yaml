@@ -16,7 +16,7 @@ regla:
   privacidad:
     pii_estrategia: tokens
     pii_tokens: [operador, tecnico]
-    estrategia_olvido: etiqueta
+    estrategia_olvido: etiquetas
 
   gobernanza:
     dimensiones:
