@@ -9,10 +9,10 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen (default: dev-0.7.1)
+#   ILLARI_TAG     — tag de imagen (default: dev-0.7.2)
 
 x-base: &base
-  image: ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.1}
+  image: ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.2}
   volumes:
     - .:/cliente/minera
   networks: [red_illari]
