@@ -60,6 +60,8 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+$OutputEncoding          = [System.Text.Encoding]::UTF8
 
 # -- Rutas ------------------------------------------------------------------
 $repoRaiz = Split-Path -Parent $PSScriptRoot
@@ -162,7 +164,7 @@ echo '[A] Copiando cliente a tmpfs nativo (Qdrant embedded requiere fs nativo, n
 cp -r /cliente/minera /tmp/minera
 
 echo '[A.1] Creando coleccion Qdrant antes de arrancar MV...'
-python3 -c 'from qdrant_client import QdrantClient; from qdrant_client.http.models import VectorParams, Distance; c=QdrantClient(path="/tmp/minera/qdrant_data"); ex=[x.name for x in c.get_collections().collections]; c.create_collection("chunks",vectors_config=VectorParams(size=384,distance=Distance.COSINE)) if "chunks" not in ex else None; print("  coleccion chunks lista"); c.close()'
+python3 -c 'from qdrant_client import QdrantClient; from qdrant_client.http.models import VectorParams, Distance; c=QdrantClient(path="/tmp/minera/qdrant_data"); ex=[x.name for x in c.get_collections().collections]; c.create_collection("chunks",vectors_config=VectorParams(size=384,distance=Distance.COSINE)) if "chunks" not in ex else None; print("  coleccion chunks lista"); c.close(); del c'
 
 echo '[A.2] Pre-descargando modelo embeddings (para arranque rapido de MV)...'
 python3 -c 'from fastembed import TextEmbedding; TextEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"); print("  modelo listo")'
