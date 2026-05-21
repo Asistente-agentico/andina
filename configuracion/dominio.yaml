@@ -79,6 +79,10 @@ dimensiones_de_gobernanza:
       - interno
       - restringido
 
+datos:
+  proveedor: duckdb
+  url: datos/minera.duckdb
+
 smoke_test_contract:
   campos_requeridos_obligatorio: true
 
