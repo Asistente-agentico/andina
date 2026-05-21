@@ -41,13 +41,18 @@ analisis/
 scripts/
   preparar_landing.py    — extrae hojas del xlsx en formato ancho (etiqueta, column01…columnNN)
   run_e2e_lectura.ps1    — E2E completo lectura: MK+MV+M1 embed+M2 pytest en un contenedor
+  run_e2e_lectura.sh     — equivalente bash de run_e2e_lectura.ps1 (Linux/macOS)
   run_e2e_escritura.ps1  — E2E completo escritura: MK+MV+M1 embed, valida chunks en Qdrant
+  run_e2e_escritura.sh   — equivalente bash de run_e2e_escritura.ps1 (Linux/macOS)
+  run_e2e_m3.ps1         — E2E reportes M3: pytest tests/e2e_m3/ sin MK/MV/Qdrant
+  run_e2e_m3.sh          — equivalente bash de run_e2e_m3.ps1 (Linux/macOS)
   check_marts.py         — diagnóstico: cuenta filas en marts gold y silver
   check_snapshots.py     — diagnóstico: cuenta filas y columnas en los snapshots
 
 tests/
-  e2e_lectura.yaml     — suite E2E lectura (M2): 4 perfiles, 10 escenarios polvo respirable
-  e2e_escritura.yaml   — suite E2E escritura (M1→MV): conteo, gobernanza, PII, cifrado
+  e2e_lectura.yaml        — suite E2E lectura (M2): 4 perfiles, 11 escenarios polvo respirable
+  e2e_escritura.yaml      — suite E2E escritura (M1→MV): conteo, gobernanza, PII, cifrado
+  e2e_m3_reportes.yaml    — suite E2E reportes (M3): concentracion_anual, 4 perfiles, 13 escenarios
 
 datos/                 — gitignoreado (PII + datos del cliente; solo en ambiente local)
 qdrant_data/           — gitignoreado (vector store local generado por chunker --embed)
@@ -140,11 +145,11 @@ Requiere `modelos/profiles.yml` local (gitignoreado). Ver `.env.example` como re
 
 ### Tests E2E
 
-Dos suites complementarias, cada una con su propio script. Ambos son pipelines
-**autocontenidos**: levantan todos los servicios dentro del contenedor, ejecutan
-los tests y los detienen. No requieren servicios externos en ejecución.
+Tres suites complementarias, cada una con su par de scripts (`.ps1` Windows / `.sh` Linux·macOS).
+Los pipelines son **autocontenidos**: levantan solo los servicios que necesitan dentro del
+contenedor. No requieren servicios externos en ejecución.
 
-#### Suite lectura — `run_e2e_lectura.ps1`
+#### Suite lectura — `run_e2e_lectura.ps1` / `.sh`
 
 Valida el pipeline RAG completo M1→MV→M2:
 - M1 embebe los marts gold y sube los chunks cifrados a Qdrant via MV.
@@ -153,27 +158,49 @@ Valida el pipeline RAG completo M1→MV→M2:
 **Prerequisito**: `datos/minera.duckdb` presente (`dbt seed && dbt run`).
 
 ```powershell
-# Prerequisito: minera.duckdb debe existir
-# cd modelos && dbt seed && dbt run
-
 .\scripts\run_e2e_lectura.ps1 -Dev
 # -Dev: monta tests/ local de Illari + verbose pytest
+```
+```bash
+bash scripts/run_e2e_lectura.sh --dev
 ```
 
 11 escenarios: 5 de negocio (P1×2 perfiles + P2 + P3 + P4), 2 de autenticación,
 1 de payload inválido, 1 sin match semántico, 2 de gobernanza (acceso denegado).
 
-#### Suite escritura — `run_e2e_escritura.ps1`
+#### Suite escritura — `run_e2e_escritura.ps1` / `.sh`
 
 Valida el pipeline de escritura M1→MV: conteo de chunks, gobernanza, PII y cifrado.
 
 ```powershell
 .\scripts\run_e2e_escritura.ps1 -Dev
 ```
+```bash
+bash scripts/run_e2e_escritura.sh --dev
+```
+
+#### Suite reportes M3 — `run_e2e_m3.ps1` / `.sh`
+
+Valida el módulo de reportes estructurados M3: gobernanza por planta, parámetros
+opcionales y autenticación. Lee directamente desde DuckDB; no requiere Qdrant ni
+`MASTER_SECRET`.
+
+**Prerequisito**: `datos/minera.duckdb` presente (`dbt seed && dbt run`).
+
+```powershell
+.\scripts\run_e2e_m3.ps1 -Dev
+```
+```bash
+bash scripts/run_e2e_m3.sh --dev
+```
+
+13 escenarios: 2 de autenticación, 1 de listado, 1 de reporte inexistente,
+4 de gobernanza por planta (acceso completo y restringido), 4 de parámetro `anio`
+(con y sin filtro, dos perfiles).
 
 #### Resultado
 
-Ambos scripts guardan el resultado en:
+Los tres pares de scripts guardan el resultado en:
 
 ```
 tests/results/{suite}-v{version}[-dev]-{timestamp}.txt
