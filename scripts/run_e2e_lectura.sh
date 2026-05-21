@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # run_e2e_lectura.sh — Levanta MK+MV+MA+M2 via docker compose y valida
 #                      consultas RAG con pytest local.
 #
@@ -13,7 +13,7 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET   — secreto de cifrado (obligatorio)
-#   ILLARI_TAG      — tag de imagen Docker (default: dev-0.7.2)
+#   ILLARI_TAG      — tag de imagen Docker (default: dev-0.7.3)
 #   GEMINI_API_KEY  — clave API de Google Gemini (obligatoria si --llm gemini)
 
 set -euo pipefail
@@ -22,7 +22,7 @@ set -euo pipefail
 # Configuración
 # ---------------------------------------------------------------------------
 IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.2}"
+IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.lectura.yml"
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
@@ -153,7 +153,7 @@ if docker image inspect "${IMAGEN}" &>/dev/null; then
     echo "[1/3] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
 else
     echo "[1/3] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -169,14 +169,14 @@ echo "[2/3] Levantando servicios MK → MV → MA + M2..."
 echo ""
 
 # Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
 GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -209,13 +209,13 @@ if [[ $MV_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: mv-api no respondió healthy en 180s." >&2
     echo "--- Logs mv-api ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
     GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs mv-api --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -249,13 +249,13 @@ if [[ $M2_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: M2 no respondió healthy en 120s." >&2
     echo "--- Logs de servicios ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
     GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -282,7 +282,7 @@ python3 -m pytest "${TEST_SUITE}" -v -s -m e2e \
 PYTEST_EXIT="${PIPESTATUS[0]}"
 
 # Detener servicios
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \

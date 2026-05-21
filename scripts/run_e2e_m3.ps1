@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Pipeline E2E reportes M3: levanta MA+M3 via docker compose, valida con pytest local.
 
@@ -16,7 +16,7 @@
     Ruta relativa al YAML de suite. Default: tests/e2e_m3_reportes.yaml
 
 .PARAMETER Tag
-    Tag de imagen Docker. Default: dev-0.7.2 (o $env:ILLARI_TAG si está definido)
+    Tag de imagen Docker. Default: dev-0.7.3 (o $env:ILLARI_TAG si está definido)
 
 .EXAMPLE
     .\scripts\run_e2e_m3.ps1
@@ -33,7 +33,7 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding          = [System.Text.Encoding]::UTF8
 
-$illariTag   = if ($Tag) { $Tag } elseif ($env:ILLARI_TAG) { $env:ILLARI_TAG } else { "dev-0.7.2" }
+$illariTag   = if ($Tag) { $Tag } elseif ($env:ILLARI_TAG) { $env:ILLARI_TAG } else { "dev-0.7.3" }
 $composeFile = "docker-compose.m3.yml"
 
 $repoRaiz    = Split-Path -Parent $PSScriptRoot

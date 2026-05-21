@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # run_e2e_m3.sh — Levanta MA+M3 via docker compose y valida reportes con pytest local.
 #
 # Prerrequisito: datos/minera.duckdb presente (dbt seed && dbt run).
@@ -9,7 +9,7 @@
 #   bash scripts/run_e2e_m3.sh tests/e2e_m3_reportes.yaml
 #
 # Variables de entorno:
-#   ILLARI_TAG  — tag de imagen Docker (default: dev-0.7.2)
+#   ILLARI_TAG  — tag de imagen Docker (default: dev-0.7.3)
 
 set -euo pipefail
 
@@ -17,7 +17,7 @@ set -euo pipefail
 # Configuración
 # ---------------------------------------------------------------------------
 IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.2}"
+IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.m3.yml"
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
@@ -81,7 +81,7 @@ if docker image inspect "${IMAGEN}" &>/dev/null; then
     echo "[1/3] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
 else
     echo "[1/3] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
 fi
 echo ""
@@ -92,10 +92,10 @@ echo ""
 echo "[2/3] Levantando servicios MA + M3..."
 echo ""
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" up -d \
     | tee -a "${OUT_FILE}"
 
@@ -124,9 +124,9 @@ if [[ $M3_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: M3 no respondió healthy en 90s." >&2
     echo "--- Logs de servicios ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
     exit 1
 fi
@@ -148,7 +148,7 @@ python3 -m pytest "${TEST_DIR}" -v -m e2e \
 
 PYTEST_EXIT="${PIPESTATUS[0]}"
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
 echo ""

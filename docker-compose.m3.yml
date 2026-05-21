@@ -12,10 +12,10 @@
 #   docker compose -f docker-compose.m3.yml down --remove-orphans
 #
 # Variables de entorno:
-#   ILLARI_TAG  — tag de imagen (default: dev-0.7.2)
+#   ILLARI_TAG  — tag de imagen (default: dev-0.7.3)
 
 x-base: &base
-  image: ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.2}
+  image: ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}
   volumes:
     - .:/cliente/minera
   networks: [red_illari]

@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+﻿#!/usr/bin/env bash
 # run_e2e_escritura.sh — Pipeline completo M1→MV→BDV y valida la salida.
 #
 # Fases:
@@ -14,7 +14,7 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen Docker (default: dev-0.7.2)
+#   ILLARI_TAG     — tag de imagen Docker (default: dev-0.7.3)
 
 set -euo pipefail
 
@@ -22,7 +22,7 @@ set -euo pipefail
 # Configuración
 # ---------------------------------------------------------------------------
 IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.2}"
+IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.escritura.yml"
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
@@ -105,7 +105,7 @@ if docker image inspect "${IMAGEN}" &>/dev/null; then
     echo "[2/4] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
 else
     echo "[2/4] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
 fi
@@ -131,11 +131,11 @@ python3 "${REPO_RAIZ}/scripts/preparar_bdv.py" --raiz "${REPO_RAIZ}"
 echo ""
 
 # Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" \
     up --abort-on-container-exit --exit-code-from m1 \
@@ -144,7 +144,7 @@ docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" \
 COMPOSE_EXIT="${PIPESTATUS[0]}"
 
 # Limpiar red y contenedores detenidos
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.2}" \
+ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
