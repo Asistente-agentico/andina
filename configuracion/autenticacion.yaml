@@ -1,7 +1,35 @@
 version: "1.0"
 modo: interno
+
+idp_externo: null  # requerido solo cuando modo: externo
+
 jwt_interno:
   ttl_minutos: 60
+  refresh_token:
+    dias: 7
+    rotar_en_cada_uso: true
+    cookie_nombre: ma_refresh
+    cookie_path: /auth/refresh
+  transporte: cookie
+  cookie_nombre: ma_session
+
+rotacion_claves:
+  rutinaria:
+    habilitada: true
+    cada_dias: 90
+    overlap_dias: 7
+    invalida_jwt_existentes: false
+  emergencia:
+    endpoint_habilitado: true
+    requiere_razon: true
+
 permisos:
   recarga_automatica: true
   intervalo_polling_segundos: 30
+  verificacion_firma_hmac: false
+
+logging:
+  formato: ndjson
+  nivel: info
+  propagar_request_id: true
+  request_id_header: X-Request-Id

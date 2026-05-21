@@ -1,0 +1,16 @@
+version: "1.0"
+tenant:
+  id: minera_prueba
+  nombre: Minera del Norte
+  dominio: null
+  region: null
+
+asistente_activo:
+  id: asistente_principal
+  nombre: Asistente Minera
+  subtitulo: Seguridad Ocupacional
+  version: null
+
+branding:
+  archivo: configuracion/ui/branding.json
+  css_personalizado: null
