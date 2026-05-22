@@ -13,7 +13,7 @@ usuarios:
       reportes: [consumir]
     gobernanza:
       dimensiones:
-        planta: ["Molienda SAG"]
+        planta: ["todas"]
         ambito: ["seguridad_ocupacional"]
         clasificacion: "restringido"
 
@@ -23,7 +23,7 @@ usuarios:
       reportes: [consumir]
     gobernanza:
       dimensiones:
-        planta: ["Pre-Chancado"]
+        planta: ["chancado"]
         ambito: ["seguridad_ocupacional"]
         clasificacion: "interno"
 

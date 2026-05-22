@@ -77,6 +77,15 @@ dimensiones_de_gobernanza:
         - Molienda SAG
         - Molienda Convencional
         - CDM
+      todas:
+        - Pre-Chancado
+        - Chancado 2° y 3°
+        - Chancado Fino 3°
+        - Chancado Fino 4°
+        - Molienda SAG
+        - Molienda Convencional
+        - CDM
+        - Nodo 3500
 
   ambito:
     tipo: enum
