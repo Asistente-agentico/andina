@@ -9,8 +9,8 @@
 usuarios:
   - user_id: "jefe.seguridad@test"
     tipo: cliente
-    roles:
-      reportes: [consumer]
+    permisos:
+      reportes: [consumir]
     gobernanza:
       dimensiones:
         planta: ["Molienda SAG"]
@@ -19,8 +19,8 @@ usuarios:
 
   - user_id: "operador.chancado@test"
     tipo: cliente
-    roles:
-      reportes: [consumer]
+    permisos:
+      reportes: [consumir]
     gobernanza:
       dimensiones:
         planta: ["Pre-Chancado"]
@@ -29,8 +29,8 @@ usuarios:
 
   - user_id: "auditor.ambiental@test"
     tipo: cliente
-    roles:
-      reportes: [consumer]
+    permisos:
+      reportes: [consumir]
     gobernanza:
       dimensiones:
         planta: [chancado, molienda]
@@ -39,8 +39,8 @@ usuarios:
 
   - user_id: "tecnico.medioambiente@test"
     tipo: cliente
-    roles:
-      reportes: [consumer]
+    permisos:
+      reportes: [consumir]
     gobernanza:
       dimensiones:
         planta: [chancado, molienda]
