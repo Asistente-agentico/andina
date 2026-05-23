@@ -1,19 +1,93 @@
-version: "1.0"
-asistente_activo:
-  id: asistente_minera
-  nombre: "Asistente Minera"
-  subtitulo: "Seguridad Ocupacional y Medioambiente"
-  version: null
+
 modulos:
-  central:
+  claves:
+    version: "0.8.0"
+    habilitado: true
+    base_url: "http://localhost:8002"
+    endpoints: []
+  autenticacion:
+    version: "0.8.0"
     habilitado: true
     base_url: "http://localhost:8001"
     endpoints: []
+  vectorial:
+    version: "0.8.0"
+    habilitado: true
+    base_url: "http://localhost:8003"
+    endpoints: []
+  ingesta:
+    version: "0.8.0"
+    habilitado: true
+    base_url: null
+    endpoints: []
   consultas:
+    version: "0.8.0"
     habilitado: true
     base_url: "http://localhost:8004"
     endpoints: []
   reportes:
+    version: "0.8.0"
     habilitado: false
     base_url: null
     endpoints: []
+  acciones:
+    version: "0.8.0"
+    habilitado: false
+    base_url: null
+    endpoints: []
+  kpis:
+    version: "0.8.0"
+    habilitado: false
+    base_url: null
+    endpoints: []
+
+proyecto_transformacion: modelos
+
+chunks:
+  valido_hasta_default: -1   # -1 = sin expiración (sentinel)
+  contrato:
+    # campos presentes en ambos contextos (prod y dev)
+    regla_id:             {grupo_dev: id}
+    fecha_creacion:       {grupo_dev: id}
+    corrida_id:           {grupo_dev: trazabilidad}
+    medallon_id:          {grupo_dev: trazabilidad}
+    valido_hasta:         {grupo_dev: vigencia, default: -1}
+    politica_vigencia:    {grupo_dev: vigencia}
+    dimensiones:          {grupo_dev: gobernanza}
+    dimensiones_en_texto: {grupo_dev: gobernanza}
+    pii_estrategia:       {grupo_dev: gobernanza}
+    pii_tokens:           {grupo_dev: gobernanza}
+    estrategia_olvido:    {grupo_dev: gobernanza}
+    hash_contenido:       {grupo_dev: integridad}
+    firma_hmac:           {grupo_dev: integridad}
+    texto:                {grupo_dev: cifrado, cifrado_en_prod: true}
+    datos_negocio:        {grupo_dev: cifrado, cifrado_en_prod: true}
+    # solo produccion
+    chunk_id:             {solo: prod}
+    regla_version:        {solo: prod}
+    dek_cifrada:          {solo: prod}
+    kek_version:          {solo: prod}
+    # solo inspeccion dev
+    chunk_clave:          {solo: dev, grupo_dev: id}
+    firma_hmac_entrada:   {solo: dev, grupo_dev: integridad}
+
+embeddings:
+  proveedor: local
+  modelo_id: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
+  dimensiones: 384
+  batch_size: 64
+  vector_store:
+    url: ./datos/qdrant_mv
+    collection: chunks
+
+hashing:
+  rules:
+    algoritmo: sha256_truncado_16
+    normalizacion: json_canonico
+
+datos:
+  proveedor: duckdb
+  url: datos/minera.duckdb
+
+smoke_test_contract:
+  campos_requeridos_obligatorio: true

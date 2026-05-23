@@ -1,108 +1,25 @@
 # dominio.yaml — Caso Minera (prueba)
 #
-# Dominio: seguridad ocupacional — concentración de polvo respirable.
-# Nota: los campos operador y tecnico contienen nombres de personas.
-# Para este caso de prueba se tratan como datos operacionales (no PII).
-# Evaluar tokenización en producción real.
+# Quién: cliente, asistentes y tenants del deployment.
+# La config técnica del pipeline vive en app.yaml.
+# Las dimensiones de gobernanza viven en permisos.yaml.
 
-version: "1.0"
-metadata:
+cliente:
   cliente_id: minera_prueba
-  descripcion: Mediciones ambientales de polvo respirable por área de planta minera
+  nombre: Minera de Chile
+  descripcion: Minera ubicada en el norte de Chile
 
-proyecto_transformacion: modelos
+asistentes:
+  - version: "0.8.0"
+    id: minera_SOyM
+    nombre: "Asistente de Seguridad Ocupacional y Medioambiente"
+    subtitulo: "Mediciones de polvo ambiental"
+    descripcion: "Mediciones ambientales de polvo respirable en puntos críticos por planta de la minera"
 
-chunks:
-  valido_hasta_default: -1   # -1 = sin expiración (sentinel)
-  contrato:
-    # campos presentes en ambos contextos (prod y dev)
-    regla_id:             {grupo_dev: id}
-    fecha_creacion:       {grupo_dev: id}
-    corrida_id:           {grupo_dev: trazabilidad}
-    medallon_id:          {grupo_dev: trazabilidad}
-    valido_hasta:         {grupo_dev: vigencia, default: -1}
-    politica_vigencia:    {grupo_dev: vigencia}
-    dimensiones:          {grupo_dev: gobernanza}
-    dimensiones_en_texto: {grupo_dev: gobernanza}
-    pii_estrategia:       {grupo_dev: gobernanza}
-    pii_tokens:           {grupo_dev: gobernanza}
-    estrategia_olvido:    {grupo_dev: gobernanza}
-    hash_contenido:       {grupo_dev: integridad}
-    firma_hmac:           {grupo_dev: integridad}
-    texto:                {grupo_dev: cifrado, cifrado_en_prod: true}
-    datos_negocio:        {grupo_dev: cifrado, cifrado_en_prod: true}
-    # solo produccion
-    chunk_id:             {solo: prod}
-    regla_version:        {solo: prod}
-    dek_cifrada:          {solo: prod}
-    kek_version:          {solo: prod}
-    # solo inspeccion dev
-    chunk_clave:          {solo: dev, grupo_dev: id}
-    firma_hmac_entrada:   {solo: dev, grupo_dev: integridad}
-
-embeddings:
-  proveedor: local
-  modelo_id: sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2
-  dimensiones: 384
-  batch_size: 64
-  vector_store:
-    url: ./datos/qdrant_mv
-    collection: chunks
-
-hashing:
-  rules:
-    algoritmo: sha256_truncado_16
-    normalizacion: json_canonico
-
-dimensiones_de_gobernanza:
-  planta:
-    tipo: enum
-    valores:
-      - Pre-Chancado
-      - Chancado 2° y 3°
-      - Chancado Fino 3°
-      - Chancado Fino 4°
-      - Molienda SAG
-      - Molienda Convencional
-      - CDM
-      - Nodo 3500
-    grupos:
-      chancado:
-        - Nodo 3500
-        - Pre-Chancado
-        - "Chancado 2° y 3°"
-        - "Chancado Fino 3°"
-        - "Chancado Fino 4°"
-      molienda:
-        - Molienda SAG
-        - Molienda Convencional
-        - CDM
-      todas:
-        - Pre-Chancado
-        - Chancado 2° y 3°
-        - Chancado Fino 3°
-        - Chancado Fino 4°
-        - Molienda SAG
-        - Molienda Convencional
-        - CDM
-        - Nodo 3500
-
-  ambito:
-    tipo: enum
-    valores:
-      - seguridad_ocupacional
-      - medioambiente
-
-  clasificacion:
-    tipo: ordinal
-    valores:
-      - interno
-      - restringido
-
-datos:
-  proveedor: duckdb
-  url: datos/minera.duckdb
-
-smoke_test_contract:
-  campos_requeridos_obligatorio: true
-
+tenants:
+  - id: minera_prueba
+    nombre: Minera de Chile
+    dominio: null
+    region: null
+    branding:
+      archivo: configuracion/ui/branding.json
