@@ -172,7 +172,7 @@ Write-Host ""
 Write-Host "[3/3] Validando chunks_generados_dev.json con pytest..."
 Write-Host ""
 
-$env:ILLARI_E2E_INGESTA = $suiteAbs
+$env:ILLARI_E2E_ESCRITURA = $suiteAbs
 $env:ILLARI_E2E_RAIZ      = $repoRaiz
 
 python -m pytest $testPipeline -v -m e2e `

@@ -155,7 +155,7 @@ echo ""
 echo "[3/3] Ejecutando pytest E2E informes-consumir..."
 echo ""
 
-ILLARI_E2E_INFORMES_CONSUMIR="${SUITE_ABS}" \
+ILLARI_E2E_M3="${SUITE_ABS}" \
 ILLARI_E2E_CLIENTE="${REPO_RAIZ}" \
 ILLARI_E2E_M3_URL="http://localhost:8005" \
 ILLARI_E2E_MA_URL="http://localhost:8001" \

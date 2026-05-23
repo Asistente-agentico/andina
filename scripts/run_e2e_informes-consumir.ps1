@@ -160,7 +160,7 @@ Write-Host ""
 Write-Host "[3/3] Ejecutando pytest E2E informes-consumir..."
 Write-Host ""
 
-$env:ILLARI_E2E_INFORMES_CONSUMIR      = $suiteAbs
+$env:ILLARI_E2E_M3      = $suiteAbs
 $env:ILLARI_E2E_CLIENTE = $repoRaiz
 $env:ILLARI_E2E_M3_URL  = "http://localhost:8005"
 $env:ILLARI_E2E_MA_URL  = "http://localhost:8001"

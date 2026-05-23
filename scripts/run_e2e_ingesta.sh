@@ -193,7 +193,7 @@ echo ""
 echo "[4/4] Validando chunks con pytest (JSON + BDV)..."
 echo ""
 
-ILLARI_E2E_INGESTA="${SUITE_ABS}" \
+ILLARI_E2E_ESCRITURA="${SUITE_ABS}" \
 ILLARI_E2E_RAIZ="${REPO_RAIZ}" \
 python3 -m pytest "${TEST_PIPELINE}" -v -m e2e \
     --rootdir="${ILLARI_TESTS}/.." \

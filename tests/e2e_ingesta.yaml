@@ -9,7 +9,7 @@
 # incluido en la imagen Docker (deuda: Dockerfile sin COPY mk/).
 #
 # Ejecutar desde el repo Illari:
-#   export ILLARI_E2E_INGESTA=/ruta/a/minera/tests/e2e_escritura.yaml
+#   export ILLARI_E2E_ESCRITURA=/ruta/a/minera/tests/e2e_escritura.yaml
 #   export ILLARI_E2E_RAIZ=/ruta/a/minera
 #   pytest tests/e2e_escritura/test_pipeline.py -v -m e2e
 #
