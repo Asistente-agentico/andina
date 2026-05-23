@@ -16,16 +16,24 @@
     Ruta relativa al YAML de suite. Default: tests/e2e_m3_reportes.yaml
 
 .PARAMETER Tag
-    Tag de imagen Docker. Default: dev-0.7.3 (o $env:ILLARI_TAG si está definido)
+    Tag de imagen del registro. Default: dev-0.7.3 (o $env:ILLARI_TAG si está definido).
+    Ignorado si se define -Image o $env:ILLARI_IMAGE.
+
+.PARAMETER Image
+    Nombre completo de imagen local (override). P.ej. "asistente-virtual:local".
+    Si se define, omite el pull y usa esa imagen directamente.
+    También se puede pasar via $env:ILLARI_IMAGE.
 
 .EXAMPLE
     .\scripts\run_e2e_m3.ps1
     .\scripts\run_e2e_m3.ps1 -Suite tests/e2e_m3_reportes.yaml
+    .\scripts\run_e2e_m3.ps1 -Image asistente-virtual:local
 #>
 
 param(
     [string]$Suite = "tests/e2e_m3_reportes.yaml",
-    [string]$Tag   = ""
+    [string]$Tag   = "",
+    [string]$Image = ""
 )
 
 Set-StrictMode -Version Latest
@@ -35,6 +43,28 @@ $OutputEncoding          = [System.Text.Encoding]::UTF8
 
 $illariTag   = if ($Tag) { $Tag } elseif ($env:ILLARI_TAG) { $env:ILLARI_TAG } else { "dev-0.7.3" }
 $composeFile = "docker-compose.m3.yml"
+
+# ILLARI_IMAGE permite usar imagen construida localmente (omite pull).
+$imagenLocal = $false
+if ($Image) {
+    $illariImage = $Image
+    $imagenLocal = $true
+} elseif ($env:ILLARI_IMAGE) {
+    $illariImage = $env:ILLARI_IMAGE
+    $imagenLocal = $true
+} else {
+    $envFile2 = Join-Path (Split-Path -Parent $PSScriptRoot) ".env"
+    if (Test-Path $envFile2) {
+        $m2 = Select-String -Path $envFile2 -Pattern '^\s*(?:export\s+)?ILLARI_IMAGE\s*=\s*(.+)$'
+        if ($m2) {
+            $illariImage = $m2.Matches[0].Groups[1].Value.Trim().Trim('"').Trim("'")
+            $imagenLocal = $true
+        }
+    }
+    if (-not $illariImage) {
+        $illariImage = "ghcr.io/asistente-agentico/illari:$illariTag"
+    }
+}
 
 $repoRaiz    = Split-Path -Parent $PSScriptRoot
 $suiteAbs    = Join-Path $repoRaiz $Suite
@@ -69,21 +99,24 @@ New-Item -ItemType File -Force -Path $outFile | Out-Null
 Write-Host ""
 Write-Host "=== Illari E2E M3 (reportes) -- minera ==="
 Write-Host "Suite  : $suiteAbs"
-Write-Host "Imagen : ghcr.io/asistente-agentico/illari:$illariTag"
+Write-Host "Imagen : $illariImage"
 Write-Host "Output : $outFile"
 Write-Host ""
 
-$env:ILLARI_TAG = $illariTag
+$env:ILLARI_IMAGE = $illariImage
 
-# -- Fase 1: docker compose pull (omite si imagen ya existe localmente) ----
-$imagenCompleta = "ghcr.io/asistente-agentico/illari:$illariTag"
-$imageExists = docker image inspect $imagenCompleta 2>$null
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "[1/3] Imagen $imagenCompleta encontrada localmente -- omitiendo pull."
+# -- Fase 1: docker compose pull (omite si imagen es local o ya existe) ----
+if ($imagenLocal) {
+    Write-Host "[1/3] Imagen local definida (ILLARI_IMAGE) -- omitiendo pull."
 } else {
-    Write-Host "[1/3] Descargando imagen Docker..."
-    docker compose -f $composeAbs pull
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $imageExists = docker image inspect $illariImage 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "[1/3] Imagen $illariImage encontrada localmente -- omitiendo pull."
+    } else {
+        Write-Host "[1/3] Descargando imagen Docker..."
+        docker compose -f $composeAbs pull
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
 }
 Write-Host ""
 

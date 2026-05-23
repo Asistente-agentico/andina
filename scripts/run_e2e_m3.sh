@@ -9,16 +9,31 @@
 #   bash scripts/run_e2e_m3.sh tests/e2e_m3_reportes.yaml
 #
 # Variables de entorno:
-#   ILLARI_TAG  — tag de imagen Docker (default: dev-0.7.3)
+#   ILLARI_TAG    — tag de imagen del registro (default: dev-0.7.3)
+#   ILLARI_IMAGE  — nombre completo de imagen (override; p.ej. asistente-virtual:local).
+#                   Si se define, omite el pull y usa esa imagen directamente.
 
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
 # Configuración
 # ---------------------------------------------------------------------------
-IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.m3.yml"
+
+# Si ILLARI_IMAGE no está definida, leer de .env o construir desde ILLARI_TAG.
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    _ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
+    if [[ -f "$_ENV_FILE" ]]; then
+        ILLARI_IMAGE=$(grep -E '^\s*(export\s+)?ILLARI_IMAGE\s*=' "$_ENV_FILE" \
+            | head -1 | sed -E 's/^\s*(export\s+)?ILLARI_IMAGE\s*=\s*//' | tr -d '"'"'" | xargs || true)
+    fi
+fi
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    ILLARI_IMAGE="ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}"
+    _IMAGEN_LOCAL=0
+else
+    _IMAGEN_LOCAL=1
+fi
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 SUITE_REL="tests/e2e_m3_reportes.yaml"
@@ -70,18 +85,20 @@ mkdir -p "$OUT_DIR"
 echo ""
 echo "=== Illari E2E M3 (reportes) — minera ==="
 echo "Suite  : ${SUITE_ABS}"
-echo "Imagen : ${IMAGEN}"
+echo "Imagen : ${ILLARI_IMAGE}"
 echo "Output : ${OUT_FILE}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 1 — Descargar imagen (omite pull si ya existe localmente)
+# Fase 1 — Descargar imagen (omite pull si es local o ya existe)
 # ---------------------------------------------------------------------------
-if docker image inspect "${IMAGEN}" &>/dev/null; then
-    echo "[1/3] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
+if [[ $_IMAGEN_LOCAL -eq 1 ]]; then
+    echo "[1/3] Imagen local definida (ILLARI_IMAGE) — omitiendo pull."
+elif docker image inspect "${ILLARI_IMAGE}" &>/dev/null; then
+    echo "[1/3] Imagen ${ILLARI_IMAGE} encontrada localmente — omitiendo pull."
 else
     echo "[1/3] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
 fi
 echo ""
@@ -92,10 +109,10 @@ echo ""
 echo "[2/3] Levantando servicios MA + M3..."
 echo ""
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" up -d \
     | tee -a "${OUT_FILE}"
 
@@ -124,9 +141,9 @@ if [[ $M3_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: M3 no respondió healthy en 90s." >&2
     echo "--- Logs de servicios ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
     exit 1
 fi
@@ -148,7 +165,7 @@ python3 -m pytest "${TEST_DIR}" -v -m e2e \
 
 PYTEST_EXIT="${PIPESTATUS[0]}"
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
 echo ""

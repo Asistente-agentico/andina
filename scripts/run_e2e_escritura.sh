@@ -14,16 +14,31 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen Docker (default: dev-0.7.3)
+#   ILLARI_TAG     — tag de imagen del registro (default: dev-0.7.3)
+#   ILLARI_IMAGE   — nombre completo de imagen (override; p.ej. asistente-virtual:local).
+#                    Si se define, omite el pull y usa esa imagen directamente.
 
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
 # Configuración
 # ---------------------------------------------------------------------------
-IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.escritura.yml"
+
+# Si ILLARI_IMAGE no está definida, leer de .env o construir desde ILLARI_TAG.
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    _ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
+    if [[ -f "$_ENV_FILE" ]]; then
+        ILLARI_IMAGE=$(grep -E '^\s*(export\s+)?ILLARI_IMAGE\s*=' "$_ENV_FILE" \
+            | head -1 | sed -E 's/^\s*(export\s+)?ILLARI_IMAGE\s*=\s*//' | tr -d '"'"'" | xargs || true)
+    fi
+fi
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    ILLARI_IMAGE="ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}"
+    _IMAGEN_LOCAL=0
+else
+    _IMAGEN_LOCAL=1
+fi
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 SUITE_REL="tests/e2e_escritura.yaml"
@@ -87,7 +102,7 @@ mkdir -p "$OUT_DIR"
 echo ""
 echo "=== Illari E2E escritura — minera ==="
 echo "Suite  : ${SUITE_ABS}"
-echo "Imagen : ${IMAGEN}"
+echo "Imagen : ${ILLARI_IMAGE}"
 echo "Output : ${OUT_FILE}"
 echo ""
 
@@ -99,13 +114,15 @@ python3 "${REPO_RAIZ}/scripts/preparar_landing.py" --raiz "${REPO_RAIZ}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 1 — Descargar imagen (omite pull si ya existe localmente)
+# Fase 1 — Descargar imagen (omite pull si es local o ya existe)
 # ---------------------------------------------------------------------------
-if docker image inspect "${IMAGEN}" &>/dev/null; then
-    echo "[2/4] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
+if [[ $_IMAGEN_LOCAL -eq 1 ]]; then
+    echo "[2/4] Imagen local definida (ILLARI_IMAGE) — omitiendo pull."
+elif docker image inspect "${ILLARI_IMAGE}" &>/dev/null; then
+    echo "[2/4] Imagen ${ILLARI_IMAGE} encontrada localmente — omitiendo pull."
 else
     echo "[2/4] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
 fi
@@ -131,11 +148,11 @@ python3 "${REPO_RAIZ}/scripts/preparar_bdv.py" --raiz "${REPO_RAIZ}"
 echo ""
 
 # Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" \
     up --abort-on-container-exit --exit-code-from m1 \
@@ -144,7 +161,7 @@ docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" \
 COMPOSE_EXIT="${PIPESTATUS[0]}"
 
 # Limpiar red y contenedores detenidos
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 

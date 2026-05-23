@@ -13,7 +13,9 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET   — secreto de cifrado (obligatorio)
-#   ILLARI_TAG      — tag de imagen Docker (default: dev-0.7.3)
+#   ILLARI_TAG      — tag de imagen del registro (default: dev-0.7.3)
+#   ILLARI_IMAGE    — nombre completo de imagen (override; p.ej. asistente-virtual:local).
+#                     Si se define, omite el pull y usa esa imagen directamente.
 #   GEMINI_API_KEY  — clave API de Google Gemini (obligatoria si --llm gemini)
 
 set -euo pipefail
@@ -21,9 +23,22 @@ set -euo pipefail
 # ---------------------------------------------------------------------------
 # Configuración
 # ---------------------------------------------------------------------------
-IMAGEN_BASE="ghcr.io/asistente-agentico/illari"
-IMAGEN="${IMAGEN_BASE}:${ILLARI_TAG:-dev-0.7.3}"
 COMPOSE_FILE="docker-compose.lectura.yml"
+
+# Si ILLARI_IMAGE no está definida, leer de .env o construir desde ILLARI_TAG.
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    _ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
+    if [[ -f "$_ENV_FILE" ]]; then
+        ILLARI_IMAGE=$(grep -E '^\s*(export\s+)?ILLARI_IMAGE\s*=' "$_ENV_FILE" \
+            | head -1 | sed -E 's/^\s*(export\s+)?ILLARI_IMAGE\s*=\s*//' | tr -d '"'"'" | xargs || true)
+    fi
+fi
+if [[ -z "${ILLARI_IMAGE:-}" ]]; then
+    ILLARI_IMAGE="ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}"
+    _IMAGEN_LOCAL=0
+else
+    _IMAGEN_LOCAL=1
+fi
 
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 SUITE_REL="tests/e2e_lectura.yaml"
@@ -141,19 +156,21 @@ mkdir -p "$OUT_DIR"
 echo ""
 echo "=== Illari E2E lectura — minera ==="
 echo "Suite  : ${SUITE_ABS}"
-echo "Imagen : ${IMAGEN}"
+echo "Imagen : ${ILLARI_IMAGE}"
 echo "LLM    : ${LLM_PROVEEDOR} (${CHAT_YAML})"
 echo "Output : ${OUT_FILE}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 1 — Descargar imagen (omite pull si ya existe localmente)
+# Fase 1 — Descargar imagen (omite pull si es local o ya existe)
 # ---------------------------------------------------------------------------
-if docker image inspect "${IMAGEN}" &>/dev/null; then
-    echo "[1/3] Imagen ${IMAGEN} encontrada localmente — omitiendo pull."
+if [[ $_IMAGEN_LOCAL -eq 1 ]]; then
+    echo "[1/3] Imagen local definida (ILLARI_IMAGE) — omitiendo pull."
+elif docker image inspect "${ILLARI_IMAGE}" &>/dev/null; then
+    echo "[1/3] Imagen ${ILLARI_IMAGE} encontrada localmente — omitiendo pull."
 else
     echo "[1/3] Descargando imagen Docker..."
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -169,14 +186,14 @@ echo "[2/3] Levantando servicios MK → MV → MA + M2..."
 echo ""
 
 # Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
 GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
 
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -209,13 +226,13 @@ if [[ $MV_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: mv-api no respondió healthy en 180s." >&2
     echo "--- Logs mv-api ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
     GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs mv-api --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -249,13 +266,13 @@ if [[ $M2_OK -eq 0 ]]; then
     echo ""
     echo "FAILED: M2 no respondió healthy en 120s." >&2
     echo "--- Logs de servicios ---" >&2
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
     GEMINI_API_KEY="${GEMINI_API_KEY:-}" \
     docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" logs --tail=30 >&2 || true
-    ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+    ILLARI_IMAGE="${ILLARI_IMAGE}" \
     MASTER_SECRET="${MASTER_SECRET}" \
     CHAT_YAML="${CHAT_YAML}" \
     M2_PIP_EXTRA="${M2_PIP_EXTRA}" \
@@ -282,7 +299,7 @@ python3 -m pytest "${TEST_SUITE}" -v -s -m e2e \
 PYTEST_EXIT="${PIPESTATUS[0]}"
 
 # Detener servicios
-ILLARI_TAG="${ILLARI_TAG:-dev-0.7.3}" \
+ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 CHAT_YAML="${CHAT_YAML}" \
 M2_PIP_EXTRA="${M2_PIP_EXTRA}" \

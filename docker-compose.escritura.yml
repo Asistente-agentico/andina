@@ -9,10 +9,12 @@
 #
 # Variables de entorno:
 #   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen (default: dev-0.7.3)
+#   ILLARI_TAG     — tag de imagen del registro (default: dev-0.7.3)
+#   ILLARI_IMAGE   — nombre completo de imagen (override; p.ej. asistente-virtual:local).
+#                    Si se define, omite el pull y usa esa imagen directamente.
 
 x-base: &base
-  image: ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}
+  image: ${ILLARI_IMAGE:-ghcr.io/asistente-agentico/illari:dev-0.7.3}
   volumes:
     - .:/cliente/minera
   networks: [red_illari]
@@ -43,7 +45,7 @@ services:
         uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
     volumes:
       - .:/cliente/minera
-      - fastembed_modelo:/home/asistente/.cache/fastembed
+      - ./datos/fastembed_cache:/home/asistente/.cache:ro
     depends_on:
       mk:
         condition: service_healthy
@@ -96,6 +98,3 @@ services:
 networks:
   red_illari:
     driver: bridge
-
-volumes:
-  fastembed_modelo:
