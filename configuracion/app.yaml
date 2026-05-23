@@ -34,8 +34,8 @@ modulos:
     endpoints: []
   reportes:
     version: "0.8.0"
-    habilitado: false
-    base_url: null
+    habilitado: true
+    base_url: "http://localhost:8005/reportes"
     endpoints: []
   acciones:
     version: "0.8.0"
