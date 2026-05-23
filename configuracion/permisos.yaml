@@ -53,8 +53,10 @@ dimensiones:
     tipo: ordinal
     nombre_ui: "Clasificación"
     valores:
+      - publico
       - interno
       - restringido
+      - solo_gerencias
 
 arboles_contextos:
   - id: AC0001
@@ -84,8 +86,8 @@ usuarios:
       reportes: [consumir]
     gobernanza:
       dimensiones:
-        planta: ["chancado"]
-        ambito: ["todos"]
+        planta: [chancado]
+        ambito: [medioambiente]
         clasificacion: "interno"
 
   - user_id: "auditor.ambiental@test"
@@ -96,11 +98,11 @@ usuarios:
       reportes: [consumir]
     gobernanza:
       dimensiones:
-        planta: [chancado, molienda]
-        ambito: ["seguridad_ocupacional"]
+        planta: [todas]
+        ambito: [todos]
         clasificacion: "restringido"
 
-  - user_id: "tecnico.medioambiente@test"
+  - user_id: "tecnico.medioambiente.molienda@test"
     tipo: cliente
     arbol_id: AC0001
     permisos:
@@ -108,6 +110,6 @@ usuarios:
       reportes: [consumir]
     gobernanza:
       dimensiones:
-        planta: [chancado, molienda]
+        planta: [molienda]
         ambito: ["medioambiente"]
         clasificacion: "interno"

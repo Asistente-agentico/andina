@@ -2,7 +2,7 @@
 # Dominio: seguridad ocupacional — concentración de polvo respirable (DS 594).
 #
 # Ejecutar desde el repo Illari:
-#   export ILLARI_E2E_M3=/ruta/a/minera/tests/e2e_m3_reportes.yaml
+#   export ILLARI_E2E_M3=/ruta/a/minera/tests/e2e_informes-consumir.yaml
 #   export ILLARI_E2E_CLIENTE=/ruta/a/minera
 #   pytest tests/e2e_m3/ -v -m e2e
 #
@@ -11,14 +11,14 @@
 #
 # Reporte probado: concentracion_anual (oro_p00002).
 #   16 filas = 8 plantas × 2 años (2025 y 2026).
-#   Gobernanza activa: solo planta (tipo enum).
+#   Gobernanza activa: solo planta (tipo enum, dimensiones_requeridas=[planta]).
 #   ambito y clasificacion del JWT no aplican (oro_p00002 no tiene esas columnas).
 #
-# Perfiles:
-#   jefe_seguridad        → planta=["Molienda SAG"]   → 2 filas
-#   operador_chancado     → planta=["Pre-Chancado"]   → 2 filas
-#   auditor_ambiental     → planta=[8 plantas]        → 16 filas
-#   tecnico_medioambiente → planta=[8 plantas]        → 16 filas
+# Perfiles (permisos.yaml):
+#   jefe_seguridad        → planta=["todas"]    → 8 plantas → 16 filas
+#   operador_chancado     → planta=[chancado]   → 5 plantas → 10 filas
+#   auditor_ambiental     → planta=[todas]      → 8 plantas → 16 filas
+#   tecnico_molienda      → planta=[molienda]   → 3 plantas →  6 filas
 
 suite: minera_m3
 version: "1.0"
@@ -26,23 +26,23 @@ descripcion: "Reportes M3 — concentración anual por planta (oro_p00002), 4 pe
 
 perfiles:
   - id: jefe_seguridad
-    descripcion: "Jefe de seguridad — solo Molienda SAG"
+    descripcion: "Jefe de seguridad — todas las plantas (grupo todas)"
     user_id: "jefe.seguridad@test"
     contrasena_test: "test-illari-2026"
 
   - id: operador_chancado
-    descripcion: "Operador Pre-Chancado — solo su planta"
+    descripcion: "Operador chancado — 5 plantas (grupo chancado)"
     user_id: "operador.chancado@test"
     contrasena_test: "test-illari-2026"
 
   - id: auditor_ambiental
-    descripcion: "Auditor — acceso a todas las plantas (todas)"
+    descripcion: "Auditor ambiental — todas las plantas (grupo todas, ambito todos)"
     user_id: "auditor.ambiental@test"
     contrasena_test: "test-illari-2026"
 
-  - id: tecnico_medioambiente
-    descripcion: "Técnico medioambiente — acceso a todas las plantas (ambito distinto, no aplica en oro_p00002)"
-    user_id: "tecnico.medioambiente@test"
+  - id: tecnico_molienda
+    descripcion: "Técnico medioambiente — 3 plantas (grupo molienda)"
+    user_id: "tecnico.medioambiente.molienda@test"
     contrasena_test: "test-illari-2026"
 
 escenarios:
@@ -82,8 +82,8 @@ escenarios:
     espera:
       status: 404
 
-  # ── Gobernanza: acceso completo ───────────────────────────────────────────
-  # auditor_ambiental tiene planta=[8 plantas] → ve los 16 filas (8 plantas × 2 años).
+  # ── Gobernanza: acceso completo (8 plantas) ──────────────────────────────
+  # auditor_ambiental y jefe_seguridad tienen planta=[todas] → 16 filas.
 
   - id: auditor_todas_plantas
     reporte: concentracion_anual
@@ -93,40 +93,36 @@ escenarios:
       status: 200
       filas_exactas: 16
 
-  # tecnico_medioambiente tiene planta=[8 plantas].
-  # Su ambito="medioambiente" no está en oro_p00002; dimensiones_requeridas=[planta]
-  # filtra el WHERE a solo planta → mismo resultado que auditor.
-
-  - id: tecnico_todas_plantas
-    reporte: concentracion_anual
-    perfil: tecnico_medioambiente
-    parametros: {}
-    espera:
-      status: 200
-      filas_exactas: 16
-
-  # ── Gobernanza: acceso restringido por planta ─────────────────────────────
-  # jefe_seguridad tiene planta=["Molienda SAG"] → 2 filas (2025 y 2026).
-
-  - id: jefe_solo_molienda_sag
+  - id: jefe_todas_plantas
     reporte: concentracion_anual
     perfil: jefe_seguridad
     parametros: {}
     espera:
       status: 200
-      filas_exactas: 2
-      planta_unica: "Molienda SAG"
+      filas_exactas: 16
 
-  # operador_chancado tiene planta=["Pre-Chancado"] → 2 filas (2025 y 2026).
+  # ── Gobernanza: acceso restringido por grupo ──────────────────────────────
+  # operador_chancado tiene planta=[chancado] → 5 plantas → 10 filas (5 × 2 años).
 
-  - id: operador_solo_pre_chancado
+  - id: operador_grupo_chancado
     reporte: concentracion_anual
     perfil: operador_chancado
     parametros: {}
     espera:
       status: 200
-      filas_exactas: 2
-      planta_unica: "Pre-Chancado"
+      filas_exactas: 10
+
+  # tecnico_molienda tiene planta=[molienda] → 3 plantas → 6 filas (3 × 2 años).
+  # Su ambito="medioambiente" no está en oro_p00002; dimensiones_requeridas=[planta]
+  # filtra el WHERE a solo planta.
+
+  - id: tecnico_grupo_molienda
+    reporte: concentracion_anual
+    perfil: tecnico_molienda
+    parametros: {}
+    espera:
+      status: 200
+      filas_exactas: 6
 
   # ── Parámetro opcional anio ───────────────────────────────────────────────
   # auditor + anio=2026 → 8 filas (una por planta, solo año 2026).
@@ -151,26 +147,24 @@ escenarios:
       status: 200
       filas_exactas: 8
 
-  # jefe + anio=2026 → 1 fila (solo Molienda SAG año 2026).
+  # operador + anio=2026 → 5 filas (5 plantas chancado, año 2026).
 
-  - id: jefe_filtro_anio_2026
+  - id: operador_filtro_anio_2026
     reporte: concentracion_anual
-    perfil: jefe_seguridad
+    perfil: operador_chancado
     parametros:
       anio: 2026
     espera:
       status: 200
-      filas_exactas: 1
-      planta_unica: "Molienda SAG"
+      filas_exactas: 5
 
-  # operador + anio=2025 → 1 fila.
+  # tecnico + anio=2025 → 3 filas (3 plantas molienda, año 2025).
 
-  - id: operador_filtro_anio_2025
+  - id: tecnico_filtro_anio_2025
     reporte: concentracion_anual
-    perfil: operador_chancado
+    perfil: tecnico_molienda
     parametros:
       anio: 2025
     espera:
       status: 200
-      filas_exactas: 1
-      planta_unica: "Pre-Chancado"
+      filas_exactas: 3
