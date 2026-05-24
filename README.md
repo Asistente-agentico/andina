@@ -4,7 +4,7 @@ Configuración del Asistente Virtual para el caso **Minera**: monitoreo de conce
 de polvo respirable en puntos de medición de faena. Responde 4 preguntas de negocio
 sobre mediciones ambientales bajo DS 594.
 
-Compatible con: `asistente-agentico/illari v0.7.3+`
+Compatible con: `asistente-agentico/illari v0.7.3+` — imagen local `asistente-virtual:local` (ver §E2E consulta)
 
 > **Este repositorio es del equipo de servicio.** El cliente nunca lo ve.
 > La configuración y los modelos de transformación viajan dentro de la imagen Docker.
@@ -143,6 +143,19 @@ $env:MASTER_SECRET = "<secreto>"
 
 Valida consultas RAG contra la BDV poblada por la suite de ingesta.
 Requiere que `datos/qdrant_mv/` exista (correr ingesta primero).
+
+> **Imagen requerida**: la imagen pública `dev-0.7.3` es anterior a Stage M2-cleanup-auth-legacy
+> y no inicializa `repo_conversaciones` correctamente (todos los endpoints retornan 503).
+> Construir la imagen local antes de correr la suite:
+> ```bash
+> docker build -t asistente-virtual:local .   # desde Illari/
+> ```
+> y agregar `ILLARI_IMAGE=asistente-virtual:local` al `.env` de minera.
+> El script lee `.env` automáticamente — no hace falta pasar la variable explícitamente.
+>
+> **URL de MV en app.yaml**: `modulos.vectorial.base_url` debe ser `http://mv-api:8002`
+> (nombre de servicio Docker). El valor `http://localhost:8003` que estaba antes era el
+> puerto de MK, no de MV.
 
 ```bash
 # Linux/macOS

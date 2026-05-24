@@ -20,7 +20,7 @@ modulos:
   vectorial:
     version: "0.8.0"
     habilitado: true
-    base_url: "http://localhost:8003"
+    base_url: "http://mv-api:8002"
     endpoints: []
   ingesta:
     version: "0.8.0"
