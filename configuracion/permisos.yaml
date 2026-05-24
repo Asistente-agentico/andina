@@ -4,46 +4,62 @@
 # hashes en env vars MA_USER_HASH_<base64url(user_id)> al ejecutar tests.
 # En producción, este archivo contiene los usuarios reales del cliente.
 
+separador_contexto_pares: "_._"
+separador_contexto_dim_valor: ":::"
+
 dimensiones:
   planta:
     tipo: enum
     nombre_ui: "Planta"
     valores:
-      - Pre-Chancado
-      - Chancado 2° y 3°
-      - Chancado Fino 3°
-      - Chancado Fino 4°
-      - Molienda SAG
-      - Molienda Convencional
-      - CDM
-      - Nodo 3500
+      - prechancado
+      - nodo_3500
+      - chancado_2y3
+      - chancado_fino_3
+      - chancado_fino_4
+      - molienda_sag
+      - molienda_convencional
+      - molienda_cdm
+    nombres_ui_valores:
+      prechancado: "Pre-chancado"
+      nodo_3500: "Nodo 3500"
+      chancado_2y3: "Chancado 2° y 3°"
+      chancado_fino_3: "Chancado fino 3°"
+      chancado_fino_4: "Chancado fino 4°"
+      molienda_sag: "Molienda SAG"
+      molienda_convencional: "Molienda convencional"
+      molienda_cdm: "CDM"
+
     grupos:
       chancado:
-        - Nodo 3500
-        - Pre-Chancado
-        - "Chancado 2° y 3°"
-        - "Chancado Fino 3°"
-        - "Chancado Fino 4°"
+        - prechancado
+        - nodo_3500
+        - chancado_2y3
+        - chancado_fino_3
+        - chancado_fino_4
       molienda:
-        - Molienda SAG
-        - Molienda Convencional
-        - CDM
+        - molienda_sag
+        - molienda_convencional
+        - molienda_cdm
       todas:
-        - Pre-Chancado
-        - Chancado 2° y 3°
-        - Chancado Fino 3°
-        - Chancado Fino 4°
-        - Molienda SAG
-        - Molienda Convencional
-        - CDM
-        - Nodo 3500
-
+        - prechancado
+        - nodo_3500
+        - chancado_2y3
+        - chancado_fino_3
+        - chancado_fino_4
+        - molienda_sag
+        - molienda_convencional
+        - molienda_cdm
+  
   ambito:
     tipo: enum
     nombre_ui: "Ámbito"
     valores:
       - seguridad_ocupacional
       - medioambiente
+    nombres_ui_valores:
+      seguridad_ocupacional: "Seguridad ocupacional"
+      medioambiente: "Medioambiente"
     grupos:
       todos:
         - seguridad_ocupacional
@@ -57,16 +73,22 @@ dimensiones:
       - interno
       - restringido
       - solo_gerencias
+    nombres_ui_valores:
+      publico: "Público"
+      interno: "Interno"
+      restringido: "Restringido"
+      solo_gerencias: "Solo gerencias"
 
 arboles_contextos:
   - id: AC0001
-    nombre: "Árbol principal"
+    nombre_ui: "Árbol principal"
     niveles:
       - dimension: ambito
       - dimension: planta
 
 usuarios:
   - user_id: "jefe.seguridad@test"
+    nombre_ui: "Jefe de Seguridad"
     tipo: cliente
     arbol_id: AC0001
     permisos:
@@ -79,6 +101,7 @@ usuarios:
         clasificacion: "restringido"
 
   - user_id: "operador.chancado@test"
+    nombre_ui: "Operador Chancado"
     tipo: cliente
     arbol_id: AC0001
     permisos:
@@ -91,6 +114,7 @@ usuarios:
         clasificacion: "interno"
 
   - user_id: "auditor.ambiental@test"
+    nombre_ui: "Auditor Ambiental"
     tipo: cliente
     arbol_id: AC0001
     permisos:
@@ -103,6 +127,7 @@ usuarios:
         clasificacion: "restringido"
 
   - user_id: "tecnico.medioambiente.molienda@test"
+    nombre_ui: "Técnico Medioambiente Molienda"
     tipo: cliente
     arbol_id: AC0001
     permisos:
@@ -111,5 +136,5 @@ usuarios:
     gobernanza:
       dimensiones:
         planta: [molienda]
-        ambito: ["medioambiente"]
+        ambito: [medioambiente]
         clasificacion: "interno"
