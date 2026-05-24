@@ -42,12 +42,13 @@ modelos/               — capa de transformación (interna; no expuesta al clie
   semillas/            — tablas de referencia (semáforo de límites)
 
 scripts/
-  preparar_landing.py       — extrae hojas del xlsx en formato ancho
-  run_e2e_ingesta.sh/.ps1 — E2E ingesta: MK → MV (BDV) ← M1 via docker compose
-  run_e2e_consulta.sh/.ps1   — E2E consulta: M2 + MA + MV contra BDV
-  run_e2e_informes-consumir.sh/.ps1        — E2E informes-consumir: MA + M3 via docker compose (sin MK/MV)
-  check_marts.py             — diagnóstico: cuenta filas en marts oro y silver
-  check_snapshots.py         — diagnóstico: cuenta filas y columnas en snapshots
+  preparar_landing.py              — extrae hojas del xlsx en formato ancho
+  descarga-fastembed.sh/.ps1       — descarga modelo fastembed a datos/fastembed_cache/ (prereq E2E ingesta)
+  run_e2e_ingesta.sh/.ps1          — E2E ingesta: MK → MV (BDV) ← M1 via docker compose
+  run_e2e_chat.sh/.ps1             — E2E chat: M2 + MA + MV contra BDV
+  run_e2e_informes-consumir.sh/.ps1 — E2E informes-consumir: MA + M3 via docker compose (sin MK/MV)
+  check_marts.py                   — diagnóstico: cuenta filas en marts oro y silver
+  check_snapshots.py               — diagnóstico: cuenta filas y columnas en snapshots
 
 docker-compose.ingesta.yml  — orquesta MK + MV + M1 para el E2E de ingesta
 docker-compose.informes-consumir.yml         — orquesta MA + M3 para el E2E de reportes
@@ -128,6 +129,16 @@ M3 es independiente y solo necesita `datos/minera.duckdb`.
 
 Levanta MK, MV y M1 via docker compose. M1 corre el pipeline completo y deja
 los chunks cifrados en `datos/qdrant_mv/` (Qdrant embebido de MV). Requiere `MASTER_SECRET`.
+
+**Prerrequisito primera vez**: descargar el modelo fastembed al caché local.
+
+```bash
+# Linux/macOS
+bash scripts/descarga-fastembed.sh
+
+# Windows
+.\scripts\descarga-fastembed.ps1
+```
 
 ```bash
 # Linux/macOS
