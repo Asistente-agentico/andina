@@ -45,6 +45,7 @@ $illariTag   = if ($Tag) { $Tag } elseif ($env:ILLARI_TAG) { $env:ILLARI_TAG } e
 $composeFile = "docker-compose.consulta.yml"
 
 # ILLARI_IMAGE permite usar imagen construida localmente (omite pull).
+$illariImage = ""
 $imagenLocal = $false
 if ($Image) {
     $illariImage = $Image
