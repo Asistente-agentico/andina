@@ -150,7 +150,7 @@ docker compose -f $composeAbs up --abort-on-container-exit --exit-code-from m1 |
     Tee-Object -FilePath $outFile -Append
 $composeExit = $LASTEXITCODE
 
-docker compose -f $composeAbs down --remove-orphans 2>$null | Out-Null
+try { docker compose -f $composeAbs down --remove-orphans 2>$null | Out-Null } catch { }
 
 if ($composeExit -ne 0) {
     Write-Host ""

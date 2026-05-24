@@ -184,7 +184,7 @@ python -m pytest (Join-Path $illariTests "e2e") -v -m e2e `
     Tee-Object -FilePath $outFile -Append
 $pytestExit = $LASTEXITCODE
 
-docker compose -f $composeAbs down --remove-orphans 2>$null | Out-Null
+try { docker compose -f $composeAbs down --remove-orphans 2>$null | Out-Null } catch { }
 
 Write-Host ""
 if ($pytestExit -eq 0) {
