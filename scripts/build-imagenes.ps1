@@ -71,7 +71,7 @@ $cfg      = Read-VersionesYaml $versionesFile
 $registry = $cfg.registry
 $versiones = $cfg.modulos
 
-$modulosBackend = @("mk", "ma", "m2", "m3")
+$modulosBackend = @("mk", "ma", "m2", "m3", "mv", "m1")
 $todosMod       = @("base") + $modulosBackend + @("ui")
 
 if ($Modulo.Count -eq 0) {
@@ -79,7 +79,7 @@ if ($Modulo.Count -eq 0) {
 }
 
 # Si algún módulo backend está en la lista pero base no, agregar base primero
-$necesitaBase = ($Modulo | Where-Object { $modulosBackend -contains $_ }).Count -gt 0
+$necesitaBase = (@($Modulo | Where-Object { $modulosBackend -contains $_ })).Count -gt 0
 if ($necesitaBase -and ($Modulo -notcontains "base")) {
     Write-Host "  (base agregado automaticamente - requerido por modulos backend)"
     $Modulo = @("base") + $Modulo
@@ -94,6 +94,8 @@ $dockerfiles = @{
     ma   = "docker\Dockerfile.ma"
     m2   = "docker\Dockerfile.m2"
     m3   = "docker\Dockerfile.m3"
+    mv   = "docker\Dockerfile.mv"
+    m1   = "docker\Dockerfile.m1"
     ui   = "customer_ui\docker\Dockerfile"
 }
 $contextos = @{
@@ -102,6 +104,8 @@ $contextos = @{
     ma   = $illariDir
     m2   = $illariDir
     m3   = $illariDir
+    mv   = $illariDir
+    m1   = $illariDir
     ui   = (Join-Path $illariDir "customer_ui")
 }
 

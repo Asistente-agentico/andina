@@ -1,38 +1,26 @@
 <#
 .SYNOPSIS
-    Pipeline E2E ingesta: MK+MV+M1 via docker compose, valida con pytest local.
+    Pipeline E2E ingesta: MK + MV + M1 via docker compose, valida con pytest local.
 
 .DESCRIPTION
     Tres fases:
-      1. docker compose pull.
+      1. Pre-flight: verifica que las imagenes locales existen.
       2. Limpiar datos/qdrant_mv/ y levantar MK + MV + M1 via docker compose.
          MK sirve las claves KEK a MV. MV cifra y persiste chunks en Qdrant.
-         M1 escribe chunks_generados_dev.json (--dev) y envía a MV.
+         M1 escribe chunks_generados_dev.json (--dev) y envia a MV.
       3. Local: pytest valida chunks_generados_dev.json contra e2e_ingesta.yaml.
 
 .PARAMETER Suite
     Ruta relativa al YAML de suite. Default: tests/e2e_ingesta.yaml
 
-.PARAMETER Tag
-    Tag de imagen del registro. Default: dev-0.7.1 (o $env:ILLARI_TAG si está definido).
-    Ignorado si se define -Image o $env:ILLARI_IMAGE.
-
-.PARAMETER Image
-    Nombre completo de imagen local (override). P.ej. "asistente-virtual:local".
-    Si se define, omite el pull y usa esa imagen directamente.
-    También se puede pasar via $env:ILLARI_IMAGE.
-
 .EXAMPLE
     $env:MASTER_SECRET = "<secreto>"
     .\scripts\run_e2e_ingesta.ps1
     .\scripts\run_e2e_ingesta.ps1 -Suite tests/e2e_ingesta.yaml
-    .\scripts\run_e2e_ingesta.ps1 -Image asistente-virtual:local
 #>
 
 param(
-    [string]$Suite = "tests/e2e_ingesta.yaml",
-    [string]$Tag   = "",
-    [string]$Image = ""
+    [string]$Suite = "tests/e2e_ingesta.yaml"
 )
 
 Set-StrictMode -Version Latest
@@ -40,39 +28,14 @@ $ErrorActionPreference = "Stop"
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 $OutputEncoding          = [System.Text.Encoding]::UTF8
 
-$illariTag   = if ($Tag) { $Tag } elseif ($env:ILLARI_TAG) { $env:ILLARI_TAG } else { "dev-0.7.1" }
 $composeFile = "docker-compose.ingesta.yml"
-
-# ILLARI_IMAGE permite usar imagen construida localmente (omite pull).
-$illariImage = ""
-$imagenLocal = $false
-if ($Image) {
-    $illariImage = $Image
-    $imagenLocal = $true
-} elseif ($env:ILLARI_IMAGE) {
-    $illariImage = $env:ILLARI_IMAGE
-    $imagenLocal = $true
-} else {
-    $envFile2 = Join-Path (Split-Path -Parent $PSScriptRoot) ".env"
-    if (Test-Path $envFile2) {
-        $m2 = Select-String -Path $envFile2 -Pattern '^\s*(?:export\s+)?ILLARI_IMAGE\s*=\s*(.+)$'
-        if ($m2) {
-            $illariImage = $m2.Matches[0].Groups[1].Value.Trim().Trim('"').Trim("'")
-            $imagenLocal = $true
-        }
-    }
-    if (-not $illariImage) {
-        $illariImage = "ghcr.io/asistente-agentico/illari:$illariTag"
-    }
-}
-
-$repoRaiz     = Split-Path -Parent $PSScriptRoot
-$suiteAbs     = Join-Path $repoRaiz $Suite
+$repoRaiz    = Split-Path -Parent $PSScriptRoot
+$suiteAbs    = Join-Path $repoRaiz $Suite
 $illariTests  = Join-Path (Split-Path -Parent $repoRaiz) "Illari\tests"
 $testPipeline = Join-Path $illariTests "e2e_escritura\test_pipeline.py"
 $composeAbs   = Join-Path $repoRaiz $composeFile
 
-# -- Leer MASTER_SECRET (env > .env > error) --------------------------------
+# -- Leer MASTER_SECRET (env > .env > error) ---------------------------------
 if (-not $env:MASTER_SECRET) {
     $envFile = Join-Path $repoRaiz ".env"
     if (Test-Path $envFile) {
@@ -83,11 +46,11 @@ if (-not $env:MASTER_SECRET) {
     }
 }
 if (-not $env:MASTER_SECRET) {
-    Write-Error "MASTER_SECRET no definido. Defínelo en `$env:MASTER_SECRET o en el archivo .env."
+    Write-Error "MASTER_SECRET no definido. Definelo en `$env:MASTER_SECRET o en el archivo .env."
     exit 1
 }
 
-# -- Validaciones previas ---------------------------------------------------
+# -- Validaciones previas ----------------------------------------------------
 if (-not (Test-Path $suiteAbs)) {
     Write-Error "Suite no encontrada: $suiteAbs"
     exit 1
@@ -97,11 +60,11 @@ if (-not (Test-Path $composeAbs)) {
     exit 1
 }
 if (-not (Test-Path $testPipeline)) {
-    Write-Error "test_pipeline.py no encontrado en $testPipeline`nVerifica que el repo Illari esté en $(Split-Path -Parent $repoRaiz)\Illari"
+    Write-Error "test_pipeline.py no encontrado en $testPipeline`nVerifica que el repo Illari este en $(Split-Path -Parent $repoRaiz)\Illari"
     exit 1
 }
 
-# -- Archivo de resultado ---------------------------------------------------
+# -- Archivo de resultado ----------------------------------------------------
 $ts      = Get-Date -Format "yyyyMMdd-HHmmss"
 $outDir  = Join-Path $repoRaiz "tests\results"
 $outFile = Join-Path $outDir "e2e_ingesta-$ts.txt"
@@ -111,46 +74,66 @@ New-Item -ItemType File -Force -Path $outFile | Out-Null
 Write-Host ""
 Write-Host "=== Illari E2E ingesta -- minera ==="
 Write-Host "Suite  : $suiteAbs"
-Write-Host "Imagen : $illariImage"
 Write-Host "Output : $outFile"
 Write-Host ""
 
-$env:ILLARI_IMAGE = $illariImage
-
-# -- Fase 1: docker compose pull (omite si imagen es local o ya existe) ----
-if ($imagenLocal) {
-    Write-Host "[1/3] Imagen local definida (ILLARI_IMAGE) -- omitiendo pull."
-} else {
-    $imageExists = docker image inspect $illariImage 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "[1/3] Imagen $illariImage encontrada localmente -- omitiendo pull."
-    } else {
-        Write-Host "[1/3] Descargando imagen Docker..."
-        docker compose -f $composeAbs pull
-        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    }
+# -- Fase 1: pre-flight (verificar imagenes locales) -------------------------
+Write-Host "[1/3] Verificando imagenes locales..."
+$modRequeridos = @(
+    @{ Mod = "mk"; Var = "ILLARI_MK_IMAGE"; Default = "illari-mk:local" },
+    @{ Mod = "mv"; Var = "ILLARI_MV_IMAGE"; Default = "illari-mv:local" },
+    @{ Mod = "m1"; Var = "ILLARI_M1_IMAGE"; Default = "illari-m1:local" }
+)
+$faltantes = @()
+foreach ($m in $modRequeridos) {
+    $envItem = Get-Item "env:$($m.Var)" -ErrorAction SilentlyContinue
+    $imagen  = if ($envItem) { $envItem.Value } else { $m.Default }
+    docker image inspect $imagen 2>&1 | Out-Null
+    if ($LASTEXITCODE -ne 0) { $faltantes += $m.Mod }
 }
+if ($faltantes.Count -gt 0) {
+    Write-Host ""
+    Write-Host "ERROR: imagenes faltantes en Docker local:" -ForegroundColor Red
+    foreach ($mod in $faltantes) { Write-Host "  illari-${mod}:local" -ForegroundColor Yellow }
+    Write-Host ""
+    Write-Host "Construye con:"
+    Write-Host "  .\scripts\build-imagenes.ps1 -Modulo $($faltantes -join ', ')"
+    Write-Host ""
+    exit 1
+}
+Write-Host "  OK: illari-mk:local, illari-mv:local, illari-m1:local"
 Write-Host ""
 
-# -- Fase 2: limpiar BDV y ejecutar pipeline --------------------------------
+# -- Fase 2: limpiar BDV y ejecutar pipeline ---------------------------------
 Write-Host "[2/3] Ejecutando pipeline MK -> MV -> M1 via docker compose..."
 Write-Host ""
 
 $qdrantDir = Join-Path $repoRaiz "datos\qdrant_mv"
-Write-Host "  Limpiando $qdrantDir..."
+Write-Host "  Limpiando $qdrantDir y volumen Docker..."
 if (Test-Path $qdrantDir) {
     Remove-Item -Recurse -Force $qdrantDir
     Write-Host "  Eliminado: $qdrantDir"
 } else {
     Write-Host "  datos/qdrant_mv/ no existe, nada que limpiar."
 }
+try { docker compose -f $composeAbs down --volumes --remove-orphans 2>$null | Out-Null } catch { }
 Write-Host ""
 
 docker compose -f $composeAbs up --abort-on-container-exit --exit-code-from m1 |
     Tee-Object -FilePath $outFile -Append
 $composeExit = $LASTEXITCODE
 
-try { docker compose -f $composeAbs down --remove-orphans 2>$null | Out-Null } catch { }
+# Copia Qdrant del volumen nombrado al host via contenedor temporal Alpine.
+# docker cp desde contenedor parado no accede volumenes nombrados (solo capas de imagen).
+# El volumen minera_qdrant_mv sigue existiendo hasta que se llame down --volumes.
+Write-Host "  Copiando BDV Qdrant del volumen Docker al host..."
+New-Item -ItemType Directory -Force -Path $qdrantDir | Out-Null
+docker run --rm -v "minera_qdrant_mv:/source:ro" -v "${qdrantDir}:/dest" alpine sh -c "cp -r /source/. /dest/"
+if ($LASTEXITCODE -ne 0) {
+    Write-Host "  ADVERTENCIA: copia de BDV Qdrant fallo (exit $LASTEXITCODE)." -ForegroundColor Yellow
+}
+
+try { docker compose -f $composeAbs down --volumes --remove-orphans 2>$null | Out-Null } catch { }
 
 if ($composeExit -ne 0) {
     Write-Host ""
@@ -169,7 +152,7 @@ Write-Host ""
 Write-Host "  Pipeline completado. chunks_generados_dev.json generado y chunks en BDV."
 Write-Host ""
 
-# -- Fase 3: pytest local ---------------------------------------------------
+# -- Fase 3: pytest local ----------------------------------------------------
 Write-Host "[3/3] Validando chunks_generados_dev.json con pytest..."
 Write-Host ""
 

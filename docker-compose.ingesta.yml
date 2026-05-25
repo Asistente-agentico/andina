@@ -1,6 +1,6 @@
-﻿# docker-compose.ingesta.yml — Suite E2E ingesta completa
+# docker-compose.ingesta.yml — Suite E2E ingesta completa
 #
-# Levanta MK → MV (BDV embebida) y corre M1 como job único.
+# Levanta MK -> MV (BDV embebida) y corre M1 como job único.
 # Los chunks quedan indexados en datos/qdrant_mv/ (Qdrant embebido de MV).
 #
 # Uso (desde la raíz del repo minera):
@@ -8,13 +8,12 @@
 #       --abort-on-container-exit --exit-code-from m1
 #
 # Variables de entorno:
-#   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen del registro (default: dev-0.7.3)
-#   ILLARI_IMAGE   — nombre completo de imagen (override; p.ej. asistente-virtual:local).
-#                    Si se define, omite el pull y usa esa imagen directamente.
+#   MASTER_SECRET     — secreto de cifrado (obligatorio)
+#   ILLARI_MK_IMAGE   — override imagen mk  (default: illari-mk:local)
+#   ILLARI_MV_IMAGE   — override imagen mv  (default: illari-mv:local)
+#   ILLARI_M1_IMAGE   — override imagen m1  (default: illari-m1:local)
 
 x-base: &base
-  image: ${ILLARI_IMAGE:-ghcr.io/asistente-agentico/illari:dev-0.7.3}
   volumes:
     - .:/cliente/minera
   networks: [red_illari]
@@ -23,6 +22,7 @@ services:
 
   mk:
     <<: *base
+    image: ${ILLARI_MK_IMAGE:-illari-mk:local}
     entrypoint: python -m mk.api.main
     environment:
       MASTER_SECRET: ${MASTER_SECRET}
@@ -37,15 +37,13 @@ services:
 
   mv-api:
     <<: *base
-    entrypoint:
-      - sh
-      - -c
-      - >-
-        pip install fastembed -q 2>/dev/null &&
-        uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
+    image: ${ILLARI_MV_IMAGE:-illari-mv:local}
+    user: "0"
+    entrypoint: uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
     volumes:
       - .:/cliente/minera
       - ./datos/fastembed_cache:/home/asistente/.cache:ro
+      - qdrant_mv:/cliente/minera/datos/qdrant_mv
     depends_on:
       mk:
         condition: service_healthy
@@ -64,13 +62,13 @@ services:
 
   m1:
     <<: *base
+    image: ${ILLARI_M1_IMAGE:-illari-m1:local}
     entrypoint:
       - sh
       - -c
       - >-
         python3 /cliente/minera/scripts/cargar_landing.py
         --raiz /cliente/minera &&
-        pip install fastembed -q 2>/dev/null &&
         dbt seed
         --project-dir /cliente/minera/modelos
         --profiles-dir /cliente/minera/modelos &&
@@ -99,3 +97,6 @@ services:
 networks:
   red_illari:
     driver: bridge
+
+volumes:
+  qdrant_mv:

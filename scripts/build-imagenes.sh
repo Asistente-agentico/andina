@@ -58,6 +58,8 @@ declare -A DOCKERFILES=(
     [ma]="docker/Dockerfile.ma"
     [m2]="docker/Dockerfile.m2"
     [m3]="docker/Dockerfile.m3"
+    [mv]="docker/Dockerfile.mv"
+    [m1]="docker/Dockerfile.m1"
     [ui]="customer_ui/docker/Dockerfile"
 )
 declare -A CONTEXTOS=(
@@ -66,11 +68,13 @@ declare -A CONTEXTOS=(
     [ma]="$ILLARI_DIR"
     [m2]="$ILLARI_DIR"
     [m3]="$ILLARI_DIR"
+    [mv]="$ILLARI_DIR"
+    [m1]="$ILLARI_DIR"
     [ui]="$ILLARI_DIR/customer_ui"
 )
 
-MODULOS_BACKEND=(mk ma m2 m3)
-TODOS=(base mk ma m2 m3 ui)
+MODULOS_BACKEND=(mk ma m2 m3 mv m1)
+TODOS=(base mk ma m2 m3 mv m1 ui)
 
 if [[ ${#MODULOS[@]} -eq 0 ]]; then
     MODULOS=("${TODOS[@]}")
