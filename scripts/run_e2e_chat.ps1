@@ -76,18 +76,7 @@ $outFile = Join-Path $outDir "e2e_chat-$ts.txt"
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 New-Item -ItemType File -Force -Path $outFile | Out-Null
 
-Write-Host ""
-Write-Host "=== Illari E2E chat -- minera ==="
-Write-Host "Suite  : $suiteAbs"
-Write-Host "Imagenes:"
-foreach ($mod in $modRequeridos) {
-    Write-Host "  $($mod.Mod): $($imagenesResueltas[$mod.Mod])"
-}
-Write-Host "Output : $outFile"
-Write-Host ""
-
 # -- Fase 1: pre-flight (verificar imagenes locales) -------------------------
-Write-Host "[1/3] Verificando imagenes locales..."
 $modRequeridos = @(
     @{ Mod = "mk"; Var = "ILLARI_MK_IMAGE"; Default = "illari-mk:local" },
     @{ Mod = "mv"; Var = "ILLARI_MV_IMAGE"; Default = "illari-mv:local" },
@@ -103,6 +92,18 @@ foreach ($m in $modRequeridos) {
     docker image inspect $imagen 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { $faltantes += $m.Mod }
 }
+
+Write-Host ""
+Write-Host "=== Illari E2E chat -- minera ==="
+Write-Host "Suite  : $suiteAbs"
+Write-Host "Imagenes:"
+foreach ($mod in $modRequeridos) {
+    Write-Host "  $($mod.Mod): $($imagenesResueltas[$mod.Mod])"
+}
+Write-Host "Output : $outFile"
+Write-Host ""
+
+Write-Host "[1/3] Verificando imagenes locales..."
 if ($faltantes.Count -gt 0) {
     Write-Host ""
     Write-Host "ERROR: imagenes faltantes en Docker local:" -ForegroundColor Red
