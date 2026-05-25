@@ -35,7 +35,7 @@ services:
       retries: 10
       start_period: 5s
 
-  mv-api:
+  mv:
     <<: *base
     image: ${ILLARI_MV_IMAGE:-illari-mv:local}
     user: "0"
@@ -86,11 +86,11 @@ services:
         --profiles-dir /cliente/minera/modelos
         --raiz /cliente/minera
     depends_on:
-      mv-api:
+      mv:
         condition: service_healthy
     environment:
       MINERA_DB_PATH: /cliente/minera/datos/minera.duckdb
-      MV_URL: "http://mv-api:8002"
+      MV_URL: "http://mv:8002"
       CLIENTE_DIR: /cliente/minera
     restart: "no"
 
