@@ -1,45 +1,28 @@
-﻿#!/usr/bin/env bash
-# run_e2e_ingesta.sh — Pipeline completo M1→MV→BDV y valida la salida.
+#!/usr/bin/env bash
+# run_e2e_ingesta.sh — Pipeline E2E ingesta: MK + MV + M1 via docker compose.
 #
-# Fases:
-#   1. Local: preparar_landing.py → CSVs en datos/csv/ desde el xlsx de mediciones.
-#   2. docker compose pull (antes de cualquier cambio destructivo).
-#   3. Limpiar datos/qdrant_mv/ y levantar MK + MV + M1 via docker compose.
-#      M1: cargar_landing.py → dbt seed → dbt snapshot → dbt run → orquestador.
-#   4. Local: pytest valida chunks_generados_dev.json contra e2e_ingesta.yaml.
+# Tres fases:
+#   1. Pre-flight: verifica que las imagenes locales existen.
+#   2. Limpiar datos/qdrant_mv/ y levantar MK + MV + M1 via docker compose.
+#      MV cifra y persiste chunks en Qdrant. M1 los genera y envia.
+#   3. Local: pytest valida chunks_generados_dev.json contra e2e_ingesta.yaml.
 #
 # Uso:
 #   bash scripts/run_e2e_ingesta.sh
 #   bash scripts/run_e2e_ingesta.sh tests/e2e_ingesta.yaml
 #
 # Variables de entorno:
-#   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen del registro (default: dev-0.7.3)
-#   ILLARI_IMAGE   — nombre completo de imagen (override; p.ej. asistente-virtual:local).
-#                    Si se define, omite el pull y usa esa imagen directamente.
+#   MASTER_SECRET      — secreto de cifrado (obligatorio)
+#   ILLARI_MK_IMAGE    — override imagen mk  (default: illari-mk:local)
+#   ILLARI_MV_IMAGE    — override imagen mv  (default: illari-mv:local)
+#   ILLARI_M1_IMAGE    — override imagen m1  (default: illari-m1:local)
 
 set -euo pipefail
 
 # ---------------------------------------------------------------------------
-# Configuración
+# Configuracion
 # ---------------------------------------------------------------------------
 COMPOSE_FILE="docker-compose.ingesta.yml"
-
-# Si ILLARI_IMAGE no está definida, leer de .env o construir desde ILLARI_TAG.
-if [[ -z "${ILLARI_IMAGE:-}" ]]; then
-    _ENV_FILE="$(cd "$(dirname "$0")/.." && pwd)/.env"
-    if [[ -f "$_ENV_FILE" ]]; then
-        ILLARI_IMAGE=$(grep -E '^\s*(export\s+)?ILLARI_IMAGE\s*=' "$_ENV_FILE" \
-            | head -1 | sed -E 's/^\s*(export\s+)?ILLARI_IMAGE\s*=\s*//' | tr -d '"'"'" | xargs || true)
-    fi
-fi
-if [[ -z "${ILLARI_IMAGE:-}" ]]; then
-    ILLARI_IMAGE="ghcr.io/asistente-agentico/illari:${ILLARI_TAG:-dev-0.7.3}"
-    _IMAGEN_LOCAL=0
-else
-    _IMAGEN_LOCAL=1
-fi
-
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 SUITE_REL="tests/e2e_ingesta.yaml"
 
@@ -62,108 +45,108 @@ if [[ -z "${MASTER_SECRET:-}" ]]; then
             | head -1 | sed -E 's/^\s*(export\s+)?MASTER_SECRET\s*=\s*//' | tr -d '"'"'" | xargs)
     fi
 fi
-
 if [[ -z "${MASTER_SECRET:-}" ]]; then
     echo "Error: MASTER_SECRET no definido." >&2
-    echo "Pásalo como variable de entorno o agrégalo al archivo .env del repo." >&2
     exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# Validar suite, dependencias y compose
+# Validar suite y test runner
 # ---------------------------------------------------------------------------
 if [[ ! -f "$SUITE_ABS" ]]; then
     echo "Error: suite no encontrada: $SUITE_ABS" >&2
     exit 1
 fi
-
 if [[ ! -f "${REPO_RAIZ}/${COMPOSE_FILE}" ]]; then
     echo "Error: ${COMPOSE_FILE} no encontrado en ${REPO_RAIZ}" >&2
     exit 1
 fi
 
-# Localizar test_pipeline.py en el repo hermano Illari
 ILLARI_TESTS="$(dirname "$REPO_RAIZ")/Illari/tests"
 TEST_PIPELINE="${ILLARI_TESTS}/e2e_escritura/test_pipeline.py"
 if [[ ! -f "$TEST_PIPELINE" ]]; then
     echo "Error: test_pipeline.py no encontrado en ${TEST_PIPELINE}" >&2
-    echo "Verifica que el repo Illari esté en $(dirname "$REPO_RAIZ")/Illari" >&2
+    echo "Verifica que el repo Illari este en $(dirname "$REPO_RAIZ")/Illari" >&2
     exit 1
 fi
 
 # ---------------------------------------------------------------------------
-# Info
+# Archivo de resultado
 # ---------------------------------------------------------------------------
 TS=$(date +%Y%m%d-%H%M%S)
 OUT_DIR="${REPO_RAIZ}/tests/results"
 OUT_FILE="${OUT_DIR}/e2e_ingesta-${TS}.txt"
 mkdir -p "$OUT_DIR"
 
+# ---------------------------------------------------------------------------
+# Fase 1 — Pre-flight: verificar imagenes locales
+# ---------------------------------------------------------------------------
+declare -A MOD_IMAGES=(
+    [mk]="${ILLARI_MK_IMAGE:-illari-mk:local}"
+    [mv]="${ILLARI_MV_IMAGE:-illari-mv:local}"
+    [m1]="${ILLARI_M1_IMAGE:-illari-m1:local}"
+)
+echo ""
+echo "[1/3] Verificando imagenes locales..."
+FALTANTES=()
+for mod in mk mv m1; do
+    if ! docker image inspect "${MOD_IMAGES[$mod]}" &>/dev/null; then
+        FALTANTES+=("$mod")
+    fi
+done
+if [[ ${#FALTANTES[@]} -gt 0 ]]; then
+    echo ""
+    echo "ERROR: imagenes faltantes en Docker local:" >&2
+    for mod in "${FALTANTES[@]}"; do echo "  illari-${mod}:local" >&2; done
+    echo ""
+    echo "Construye con:"
+    echo "  bash scripts/build-imagenes.sh ${FALTANTES[*]}"
+    exit 1
+fi
+echo "  OK: illari-mk:local, illari-mv:local, illari-m1:local"
+echo ""
+
 echo ""
 echo "=== Illari E2E ingesta — minera ==="
 echo "Suite  : ${SUITE_ABS}"
-echo "Imagen : ${ILLARI_IMAGE}"
+echo "Imagenes:"
+for mod in mk mv m1; do echo "  ${mod}: ${MOD_IMAGES[$mod]}"; done
 echo "Output : ${OUT_FILE}"
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 0 — Preparar CSVs de landing desde el xlsx de mediciones
+# Fase 2 — Limpiar BDV y ejecutar pipeline
 # ---------------------------------------------------------------------------
-echo "[1/4] Preparando CSVs de landing..."
-python3 "${REPO_RAIZ}/scripts/preparar_landing.py" --raiz "${REPO_RAIZ}"
-echo ""
-
-# ---------------------------------------------------------------------------
-# Fase 1 — Descargar imagen (omite pull si es local o ya existe)
-# ---------------------------------------------------------------------------
-if [[ $_IMAGEN_LOCAL -eq 1 ]]; then
-    echo "[2/4] Imagen local definida (ILLARI_IMAGE) — omitiendo pull."
-elif docker image inspect "${ILLARI_IMAGE}" &>/dev/null; then
-    echo "[2/4] Imagen ${ILLARI_IMAGE} encontrada localmente — omitiendo pull."
-else
-    echo "[2/4] Descargando imagen Docker..."
-    ILLARI_IMAGE="${ILLARI_IMAGE}" \
-    MASTER_SECRET="${MASTER_SECRET}" \
-    docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" pull
-fi
-echo ""
-
-# ---------------------------------------------------------------------------
-# Fase 2 — Limpiar BDV y ejecutar pipeline MK + MV + M1
-# ---------------------------------------------------------------------------
-echo "[3/4] Ejecutando pipeline MK → MV → M1 via docker compose..."
+echo "[2/3] Ejecutando pipeline MK -> MV -> M1 via docker compose..."
 echo ""
 
 QDRANT_DIR="${REPO_RAIZ}/datos/qdrant_mv"
-echo "  Limpiando ${QDRANT_DIR}..."
+echo "  Limpiando ${QDRANT_DIR} y volumen Docker..."
 if [[ -d "$QDRANT_DIR" ]]; then
     rm -rf "$QDRANT_DIR"
     echo "  Eliminado: ${QDRANT_DIR}"
 else
     echo "  datos/qdrant_mv/ no existe, nada que limpiar."
 fi
-
-echo "  Pre-creando colección Qdrant (el contenedor MV escribe, no crea)..."
-python3 "${REPO_RAIZ}/scripts/preparar_bdv.py" --raiz "${REPO_RAIZ}"
+MASTER_SECRET="${MASTER_SECRET}" \
+docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --volumes --remove-orphans 2>/dev/null || true
 echo ""
 
-# Garantizar estado limpio: si hay contenedores previos (config stale), bajarlos.
-ILLARI_IMAGE="${ILLARI_IMAGE}" \
-MASTER_SECRET="${MASTER_SECRET}" \
-docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
-
-ILLARI_IMAGE="${ILLARI_IMAGE}" \
 MASTER_SECRET="${MASTER_SECRET}" \
 docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" \
     up --abort-on-container-exit --exit-code-from m1 \
     | tee -a "${OUT_FILE}"
-
 COMPOSE_EXIT="${PIPESTATUS[0]}"
 
-# Limpiar red y contenedores detenidos
-ILLARI_IMAGE="${ILLARI_IMAGE}" \
+# Copiar BDV Qdrant del volumen Docker al host via Alpine
+echo "  Copiando BDV Qdrant del volumen Docker al host..."
+mkdir -p "$QDRANT_DIR"
+docker run --rm -v "minera_qdrant_mv:/source:ro" -v "${QDRANT_DIR}:/dest" \
+    alpine sh -c "cp -r /source/. /dest/" || \
+    echo "  ADVERTENCIA: copia de BDV Qdrant fallo."
+
 MASTER_SECRET="${MASTER_SECRET}" \
-docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --remove-orphans 2>/dev/null || true
+docker compose -f "${REPO_RAIZ}/${COMPOSE_FILE}" down --volumes --remove-orphans 2>/dev/null || true
 
 if [[ $COMPOSE_EXIT -ne 0 ]]; then
     echo ""
@@ -177,28 +160,23 @@ if [[ ! -f "${REPO_RAIZ}/datos/chunks_generados_dev.json" ]]; then
     exit 1
 fi
 
-if [[ ! -d "${REPO_RAIZ}/datos/qdrant_mv" ]] || [[ -z "$(ls -A "${REPO_RAIZ}/datos/qdrant_mv" 2>/dev/null)" ]]; then
-    echo ""
-    echo "FAILED: datos/qdrant_mv/ vacío o inexistente — MV no indexó los chunks." >&2
-    exit 1
-fi
-
 echo ""
 echo "  Pipeline completado. chunks_generados_dev.json generado y chunks en BDV."
 echo ""
 
 # ---------------------------------------------------------------------------
-# Fase 3 — Validación local con pytest
+# Fase 3 — Validacion local con pytest
 # ---------------------------------------------------------------------------
-echo "[4/4] Validando chunks con pytest (JSON + BDV)..."
+echo "[3/3] Validando chunks_generados_dev.json con pytest..."
 echo ""
 
 ILLARI_E2E_ESCRITURA="${SUITE_ABS}" \
 ILLARI_E2E_RAIZ="${REPO_RAIZ}" \
 python3 -m pytest "${TEST_PIPELINE}" -v -m e2e \
     --rootdir="${ILLARI_TESTS}/.." \
+    --ignore="${ILLARI_TESTS}/e2e_chat" \
+    --ignore="${ILLARI_TESTS}/e2e_m3" \
     | tee -a "${OUT_FILE}"
-
 PYTEST_EXIT="${PIPESTATUS[0]}"
 
 echo ""

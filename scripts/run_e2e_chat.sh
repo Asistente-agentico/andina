@@ -162,6 +162,8 @@ echo ""
 echo "=== Illari E2E chat — minera ==="
 echo "Suite  : ${SUITE_ABS}"
 echo "LLM    : ${LLM_PROVEEDOR} (${CHAT_YAML})"
+echo "Imagenes:"
+for mod in mk mv ma m2; do echo "  ${mod}: ${MOD_IMAGES[$mod]}"; done
 echo "Output : ${OUT_FILE}"
 echo ""
 

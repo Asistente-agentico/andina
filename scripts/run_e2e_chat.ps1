@@ -79,6 +79,10 @@ New-Item -ItemType File -Force -Path $outFile | Out-Null
 Write-Host ""
 Write-Host "=== Illari E2E chat -- minera ==="
 Write-Host "Suite  : $suiteAbs"
+Write-Host "Imagenes:"
+foreach ($mod in $modRequeridos) {
+    Write-Host "  $($mod.Mod): $($imagenesResueltas[$mod.Mod])"
+}
 Write-Host "Output : $outFile"
 Write-Host ""
 
@@ -91,9 +95,11 @@ $modRequeridos = @(
     @{ Mod = "m2"; Var = "ILLARI_M2_IMAGE"; Default = "illari-m2:0.1.1" }
 )
 $faltantes = @()
+$imagenesResueltas = @{}
 foreach ($m in $modRequeridos) {
     $envItem = Get-Item "env:$($m.Var)" -ErrorAction SilentlyContinue
     $imagen  = if ($envItem) { $envItem.Value } else { $m.Default }
+    $imagenesResueltas[$m.Mod] = $imagen
     docker image inspect $imagen 2>&1 | Out-Null
     if ($LASTEXITCODE -ne 0) { $faltantes += $m.Mod }
 }
