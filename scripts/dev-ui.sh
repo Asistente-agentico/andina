@@ -9,11 +9,22 @@
 # Requiere que el repo Illari este en ../Illari relativo a minera.
 #
 # Uso:
-#   bash scripts/dev-ui.sh [up|down|logs|ps]
+#   bash scripts/dev-ui.sh [up|down|logs|ps] [servicio]
+#
+# Sin servicio, opera sobre todo el stack:
+#   bash scripts/dev-ui.sh up        # levanta stack completo + healthchecks
+#   bash scripts/dev-ui.sh down      # baja todo
+#
+# Con servicio, opera solo sobre ese contenedor:
+#   bash scripts/dev-ui.sh up ui     # levanta solo ui (sin wait loops)
+#   bash scripts/dev-ui.sh down ui   # stop + rm de ui, otros siguen corriendo
+#   bash scripts/dev-ui.sh logs ui   # tail -f logs solo de ui
+#   bash scripts/dev-ui.sh ps ui     # estado solo de ui
 
 set -euo pipefail
 
 CMD="${1:-up}"
+SVC="${2:-}"
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 ILLARI_DIR="$(cd "$REPO_RAIZ/../Illari" 2>/dev/null && pwd || true)"
 
@@ -49,11 +60,11 @@ export CLIENTE_DIR="$REPO_RAIZ"
 COMPOSE_FILE="$ILLARI_DIR/docker-compose.ui.yml"
 
 # ---------------------------------------------------------------------------
-# Pre-flight: verificar imágenes locales (solo en subcomando up)
-# Se activa si existe minera/imagenes/versiones.yaml.
+# Pre-flight: verificar imágenes locales (solo en `up` sobre el stack completo).
+# Si pides `up <servicio>` asumimos que ese servicio ya está construido.
 # ---------------------------------------------------------------------------
 VERSIONES_FILE="$REPO_RAIZ/imagenes/versiones.yaml"
-if [[ "$CMD" == "up" && -f "$VERSIONES_FILE" ]]; then
+if [[ "$CMD" == "up" && -z "$SVC" && -f "$VERSIONES_FILE" ]]; then
     declare -A _MOD_VARS=(
         [mk]="ILLARI_MK_IMAGE"
         [ma]="ILLARI_MA_IMAGE"
@@ -92,15 +103,36 @@ fi
 
 case "$CMD" in
     down)
-        docker compose -f "$COMPOSE_FILE" down --remove-orphans
+        if [[ -n "$SVC" ]]; then
+            docker compose -f "$COMPOSE_FILE" stop "$SVC"
+            docker compose -f "$COMPOSE_FILE" rm -f "$SVC"
+        else
+            docker compose -f "$COMPOSE_FILE" down --remove-orphans
+        fi
         ;;
     logs)
-        docker compose -f "$COMPOSE_FILE" logs -f
+        if [[ -n "$SVC" ]]; then
+            docker compose -f "$COMPOSE_FILE" logs -f "$SVC"
+        else
+            docker compose -f "$COMPOSE_FILE" logs -f
+        fi
         ;;
     ps)
-        docker compose -f "$COMPOSE_FILE" ps
+        if [[ -n "$SVC" ]]; then
+            docker compose -f "$COMPOSE_FILE" ps "$SVC"
+        else
+            docker compose -f "$COMPOSE_FILE" ps
+        fi
         ;;
     up)
+        if [[ -n "$SVC" ]]; then
+            echo "=== Levantando solo: $SVC ==="
+            docker compose -f "$COMPOSE_FILE" up -d "$SVC"
+            echo ""
+            echo "  Estado:  bash scripts/dev-ui.sh ps $SVC"
+            echo "  Logs:    bash scripts/dev-ui.sh logs $SVC"
+            exit 0
+        fi
         echo ""
         echo "=== Illari dev-ui -- MK + MA + M2 + UI ==="
         echo "Cliente : $REPO_RAIZ"
@@ -137,7 +169,7 @@ case "$CMD" in
         echo "  Stop:  bash scripts/dev-ui.sh down"
         ;;
     *)
-        echo "Uso: bash scripts/dev-ui.sh [up|down|logs|ps]" >&2
+        echo "Uso: bash scripts/dev-ui.sh [up|down|logs|ps] [servicio]" >&2
         exit 1
         ;;
 esac
