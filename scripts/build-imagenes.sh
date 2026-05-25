@@ -96,13 +96,31 @@ if [[ "$NECESITA_BASE" == true && "$TIENE_BASE" == false ]]; then
     MODULOS=(base "${MODULOS[@]}")
 fi
 
-# base siempre primero, deduplicar
+# Deduplicar preservando orden. base solo aparece si está en la lista
+# pedida o si el bloque NECESITA_BASE arriba lo agregó.
 declare -a MODULOS_ORDERED=()
-for m in base "${MODULOS[@]}"; do
+for m in "${MODULOS[@]}"; do
     FOUND=false
     for x in "${MODULOS_ORDERED[@]:-}"; do [[ "$x" == "$m" ]] && FOUND=true && break; done
     $FOUND || MODULOS_ORDERED+=("$m")
 done
+
+# Si base está en la lista pero no en posición 0, moverlo al inicio
+# (los módulos backend dependen de él, debe construirse primero).
+if [[ ${#MODULOS_ORDERED[@]} -gt 1 && "${MODULOS_ORDERED[0]}" != "base" ]]; then
+    declare -a SIN_BASE=()
+    TIENE_BASE_AHORA=false
+    for m in "${MODULOS_ORDERED[@]}"; do
+        if [[ "$m" == "base" ]]; then
+            TIENE_BASE_AHORA=true
+        else
+            SIN_BASE+=("$m")
+        fi
+    done
+    if [[ "$TIENE_BASE_AHORA" == true ]]; then
+        MODULOS_ORDERED=(base "${SIN_BASE[@]}")
+    fi
+fi
 MODULOS=("${MODULOS_ORDERED[@]}")
 
 echo ""
