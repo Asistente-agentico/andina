@@ -9,22 +9,24 @@
 # Requiere que el repo Illari este en ../Illari relativo a minera.
 #
 # Uso:
-#   bash scripts/dev-ui.sh [up|down|logs|ps] [servicio]
+#   bash scripts/dev-ui.sh [up|down|logs|ps] [servicio ...]
 #
-# Sin servicio, opera sobre todo el stack:
-#   bash scripts/dev-ui.sh up        # levanta stack completo + healthchecks
-#   bash scripts/dev-ui.sh down      # baja todo
+# Sin servicios, opera sobre todo el stack:
+#   bash scripts/dev-ui.sh up         # levanta stack completo + healthchecks
+#   bash scripts/dev-ui.sh down       # baja todo
 #
-# Con servicio, opera solo sobre ese contenedor:
-#   bash scripts/dev-ui.sh up ui     # levanta solo ui (sin wait loops)
-#   bash scripts/dev-ui.sh down ui   # stop + rm de ui, otros siguen corriendo
-#   bash scripts/dev-ui.sh logs ui   # tail -f logs solo de ui
-#   bash scripts/dev-ui.sh ps ui     # estado solo de ui
+# Con uno o más servicios, opera solo sobre esos contenedores:
+#   bash scripts/dev-ui.sh up ui          # solo ui (sin wait loops)
+#   bash scripts/dev-ui.sh up ui mv-api   # ui + mv-api en una sola pasada
+#   bash scripts/dev-ui.sh down ma m2 ui  # stop + rm de los tres, resto sigue
+#   bash scripts/dev-ui.sh logs ui mv-api # tail -f de ambos
+#   bash scripts/dev-ui.sh ps ui m2       # estado de ambos
 
 set -euo pipefail
 
 CMD="${1:-up}"
-SVC="${2:-}"
+shift || true
+SVCS=("$@")
 REPO_RAIZ="$(cd "$(dirname "$0")/.." && pwd)"
 ILLARI_DIR="$(cd "$REPO_RAIZ/../Illari" 2>/dev/null && pwd || true)"
 
@@ -61,10 +63,10 @@ COMPOSE_FILE="$ILLARI_DIR/docker-compose.ui.yml"
 
 # ---------------------------------------------------------------------------
 # Pre-flight: verificar imágenes locales (solo en `up` sobre el stack completo).
-# Si pides `up <servicio>` asumimos que ese servicio ya está construido.
+# Si pides `up <servicio> [...]` asumimos que esas imágenes ya están construidas.
 # ---------------------------------------------------------------------------
 VERSIONES_FILE="$REPO_RAIZ/imagenes/versiones.yaml"
-if [[ "$CMD" == "up" && -z "$SVC" && -f "$VERSIONES_FILE" ]]; then
+if [[ "$CMD" == "up" && ${#SVCS[@]} -eq 0 && -f "$VERSIONES_FILE" ]]; then
     declare -A _MOD_VARS=(
         [mk]="ILLARI_MK_IMAGE"
         [ma]="ILLARI_MA_IMAGE"
@@ -103,34 +105,34 @@ fi
 
 case "$CMD" in
     down)
-        if [[ -n "$SVC" ]]; then
-            docker compose -f "$COMPOSE_FILE" stop "$SVC"
-            docker compose -f "$COMPOSE_FILE" rm -f "$SVC"
+        if [[ ${#SVCS[@]} -gt 0 ]]; then
+            docker compose -f "$COMPOSE_FILE" stop "${SVCS[@]}"
+            docker compose -f "$COMPOSE_FILE" rm -f "${SVCS[@]}"
         else
             docker compose -f "$COMPOSE_FILE" down --remove-orphans
         fi
         ;;
     logs)
-        if [[ -n "$SVC" ]]; then
-            docker compose -f "$COMPOSE_FILE" logs -f "$SVC"
+        if [[ ${#SVCS[@]} -gt 0 ]]; then
+            docker compose -f "$COMPOSE_FILE" logs -f "${SVCS[@]}"
         else
             docker compose -f "$COMPOSE_FILE" logs -f
         fi
         ;;
     ps)
-        if [[ -n "$SVC" ]]; then
-            docker compose -f "$COMPOSE_FILE" ps "$SVC"
+        if [[ ${#SVCS[@]} -gt 0 ]]; then
+            docker compose -f "$COMPOSE_FILE" ps "${SVCS[@]}"
         else
             docker compose -f "$COMPOSE_FILE" ps
         fi
         ;;
     up)
-        if [[ -n "$SVC" ]]; then
-            echo "=== Levantando solo: $SVC ==="
-            docker compose -f "$COMPOSE_FILE" up -d "$SVC"
+        if [[ ${#SVCS[@]} -gt 0 ]]; then
+            echo "=== Levantando solo: ${SVCS[*]} ==="
+            docker compose -f "$COMPOSE_FILE" up -d "${SVCS[@]}"
             echo ""
-            echo "  Estado:  bash scripts/dev-ui.sh ps $SVC"
-            echo "  Logs:    bash scripts/dev-ui.sh logs $SVC"
+            echo "  Estado:  bash scripts/dev-ui.sh ps ${SVCS[*]}"
+            echo "  Logs:    bash scripts/dev-ui.sh logs ${SVCS[*]}"
             exit 0
         fi
         echo ""
@@ -169,7 +171,7 @@ case "$CMD" in
         echo "  Stop:  bash scripts/dev-ui.sh down"
         ;;
     *)
-        echo "Uso: bash scripts/dev-ui.sh [up|down|logs|ps] [servicio]" >&2
+        echo "Uso: bash scripts/dev-ui.sh [up|down|logs|ps] [servicio ...]" >&2
         exit 1
         ;;
 esac

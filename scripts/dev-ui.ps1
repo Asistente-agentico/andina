@@ -12,18 +12,25 @@
 .PARAMETER Cmd
     Subcomando: up (default) | down | logs | ps
 
+.PARAMETER Servicios
+    (Opcional) Uno o más servicios; si se indica, el subcomando opera solo
+    sobre esos contenedores en vez del stack completo. Ej. `up ui` levanta
+    solo ui; `down ma,m2,ui` baja los tres dejando el resto corriendo.
+
 .PARAMETER UiPort
     Puerto de la UI en el host. Default: 3000
 
 .EXAMPLE
     .\scripts\dev-ui.ps1
     .\scripts\dev-ui.ps1 -Cmd down
-    .\scripts\dev-ui.ps1 -Cmd logs
+    .\scripts\dev-ui.ps1 -Cmd up   -Servicios ui
+    .\scripts\dev-ui.ps1 -Cmd down -Servicios ma,m2,ui
 #>
 
 param(
-    [string]$Cmd    = "up",
-    [string]$UiPort = "3000"
+    [string]  $Cmd       = "up",
+    [string[]]$Servicios = @(),
+    [string]  $UiPort    = "3000"
 )
 
 Set-StrictMode -Version Latest
@@ -68,7 +75,7 @@ if (-not $env:MASTER_SECRET) {
 # Se activa si existe minera/imagenes/versiones.yaml.
 # ---------------------------------------------------------------------------
 $versionesFile = Join-Path $repoRaiz "imagenes\versiones.yaml"
-if (($Cmd -eq "up") -and (Test-Path $versionesFile)) {
+if (($Cmd -eq "up") -and ($Servicios.Count -eq 0) -and (Test-Path $versionesFile)) {
     $modImagenes = @(
         @{ Mod = "mk"; Var = "ILLARI_MK_IMAGE"; Default = "illari-mk:local" },
         @{ Mod = "ma"; Var = "ILLARI_MA_IMAGE"; Default = "illari-ma:local" },
@@ -96,5 +103,9 @@ if (($Cmd -eq "up") -and (Test-Path $versionesFile)) {
     }
 }
 
-& $illariScript -Cmd $Cmd -ClienteDir $repoRaiz -UiPort $UiPort
+if ($Servicios.Count -gt 0) {
+    & $illariScript -Cmd $Cmd -ClienteDir $repoRaiz -UiPort $UiPort -Servicios $Servicios
+} else {
+    & $illariScript -Cmd $Cmd -ClienteDir $repoRaiz -UiPort $UiPort
+}
 exit $LASTEXITCODE
