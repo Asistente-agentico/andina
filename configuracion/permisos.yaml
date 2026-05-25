@@ -11,7 +11,7 @@ dimensiones:
   planta:
     tipo: enum
     nombre_ui: "Planta"
-    # Convención: nombres_ui_valores SOLO para aliases de grupo (sin contraparte
+    # Convención: nombres_ui_grupos SOLO para aliases de grupo (sin contraparte
     # en BD). Los valores concretos deben aparecer tal cual están en la BD
     # fuente (bronce_mediciones.sql) para match exacto contra chunks de Qdrant.
     valores:
@@ -23,11 +23,6 @@ dimensiones:
       - "Molienda SAG"
       - "Molienda Convencional"
       - "CDM"
-
-    nombres_ui_valores:
-      chancado: "Chancado"
-      molienda: "Molienda"
-      todas: "Todas"
 
     grupos:
       chancado:
@@ -50,31 +45,36 @@ dimensiones:
         - "Molienda Convencional"
         - "CDM"
 
+    nombres_ui_grupos:
+      chancado: "Chancado"
+      molienda: "Molienda"
+      todas: "Todas"
+
   ambito:
     tipo: enum
     nombre_ui: "Ámbito"
-    # Convención: nombres_ui_valores SOLO para grupos. Los valores concretos
-    # (seguridad_ocupacional, medioambiente) aparecen tal cual en BD.
+    # Convención: nombres_ui_grupos SOLO para grupos. Los valores concretos
+    # (Seguridad Ocupacional, Medioambiente) aparecen tal cual en BD.
     valores:
-      - seguridad_ocupacional
-      - medioambiente
-    nombres_ui_valores:
-      todos: "Todos"
+      - "Seguridad Ocupacional"
+      - "Medioambiente"
     grupos:
       todos:
-        - seguridad_ocupacional
-        - medioambiente
+        - "Seguridad Ocupacional"
+        - "Medioambiente"
+    nombres_ui_grupos:
+      todos: "Todos"
 
   clasificacion:
     tipo: ordinal
     nombre_ui: "Clasificación"
-    # Sin grupos → sin nombres_ui_valores. Los valores ordinales aparecen
+    # Sin grupos → sin nombres_ui_grupos. Los valores ordinales aparecen
     # tal cual están definidos.
     valores:
-      - publico
-      - interno
-      - restringido
-      - solo_gerencias
+      - "Público"
+      - "Interno"
+      - "Restringido"
+      - "Solo gerencias"
 
 arboles_contextos:
   - id: AC0001
@@ -94,7 +94,7 @@ usuarios:
     gobernanza:
       dimensiones:
         planta: ["todas"]
-        ambito: ["seguridad_ocupacional"]
+        ambito: ["Seguridad Ocupacional"]
         clasificacion: "restringido"
 
   - user_id: "operador.chancado@test"
@@ -107,7 +107,7 @@ usuarios:
     gobernanza:
       dimensiones:
         planta: [chancado]
-        ambito: [medioambiente]
+        ambito: ["Medioambiente"]
         clasificacion: "interno"
 
   - user_id: "auditor.ambiental@test"
@@ -121,7 +121,7 @@ usuarios:
       dimensiones:
         planta: [todas]
         ambito: [todos]
-        clasificacion: "restringido"
+        clasificacion: "Restringido"
 
   - user_id: "tecnico.medioambiente.molienda@test"
     nombre_ui: "Técnico Medioambiente Molienda"
@@ -133,5 +133,5 @@ usuarios:
     gobernanza:
       dimensiones:
         planta: [molienda]
-        ambito: [medioambiente]
+        ambito: ["Medioambiente"]
         clasificacion: "interno"
