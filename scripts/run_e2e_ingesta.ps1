@@ -161,7 +161,7 @@ $env:ILLARI_E2E_RAIZ      = $repoRaiz
 
 python -m pytest $testPipeline -v -m e2e `
     --rootdir=(Join-Path $illariTests "..") `
-    --ignore=(Join-Path $illariTests "e2e") `
+    --ignore=(Join-Path $illariTests "e2e_chat") `
     --ignore=(Join-Path $illariTests "e2e_m3") |
     Tee-Object -FilePath $outFile -Append
 $pytestExit = $LASTEXITCODE

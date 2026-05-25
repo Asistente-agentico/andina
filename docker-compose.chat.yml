@@ -1,23 +1,25 @@
-﻿# docker-compose.consulta.yml — Suite E2E lectura completa
+# docker-compose.chat.yml — Suite E2E chat (read path)
 #
-# Levanta MK → MV → MA + M2.
-# MA (8001) y M2 (8000) se exponen al host para que pytest corra localmente.
+# Levanta MK -> MV -> MA + M2.
+# MA (8001), M2 (8000) y MV (8002) se exponen al host para pytest y health checks.
 #
-# Prerrequisito: datos/qdrant_mv/ poblada por la suite de ingesta.
+# Prerrequisito: datos/qdrant_mv/ poblada por run_e2e_ingesta.ps1 / run_e2e_ingesta.sh.
 #
 # Uso (desde la raíz del repo minera):
-#   MASTER_SECRET=xxx docker compose -f docker-compose.consulta.yml up -d
-#   # esperar a M2 healthy, luego ejecutar pytest
-#   docker compose -f docker-compose.consulta.yml down --remove-orphans
+#   MASTER_SECRET=xxx docker compose -f docker-compose.chat.yml up -d
+#   docker compose -f docker-compose.chat.yml down --remove-orphans
 #
 # Variables de entorno:
-#   MASTER_SECRET  — secreto de cifrado (obligatorio)
-#   ILLARI_TAG     — tag de imagen del registro (default: dev-0.7.3)
-#   ILLARI_IMAGE   — nombre completo de imagen (override; p.ej. asistente-virtual:local).
-#                    Si se define, omite el pull y usa esa imagen directamente.
+#   MASTER_SECRET      — secreto de cifrado (obligatorio)
+#   ILLARI_MK_IMAGE    — override imagen mk  (default: illari-mk:local)
+#   ILLARI_MV_IMAGE    — override imagen mv  (default: illari-mv:local)
+#   ILLARI_MA_IMAGE    — override imagen ma  (default: illari-ma:local)
+#   ILLARI_M2_IMAGE    — override imagen m2  (default: illari-m2:local)
+#   CHAT_YAML          — yaml de config del LLM (default: ./configuracion/chat.eco.yaml)
+#   M2_PIP_EXTRA       — paquetes extra para M2 (p.ej. google-genai para Gemini)
+#   GEMINI_API_KEY     — clave API Gemini (solo si M2_PIP_EXTRA incluye google-genai)
 
 x-base: &base
-  image: ${ILLARI_IMAGE:-ghcr.io/asistente-agentico/illari:dev-0.7.3}
   volumes:
     - .:/cliente/minera
   networks: [red_illari]
@@ -26,6 +28,7 @@ services:
 
   mk:
     <<: *base
+    image: ${ILLARI_MK_IMAGE:-illari-mk:local}
     entrypoint: python -m mk.api.main
     environment:
       MASTER_SECRET: ${MASTER_SECRET}
@@ -40,15 +43,12 @@ services:
 
   mv-api:
     <<: *base
-    entrypoint:
-      - sh
-      - -c
-      - >-
-        pip install fastembed -q 2>/dev/null &&
-        uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
+    image: ${ILLARI_MV_IMAGE:-illari-mv:local}
+    user: "0"
+    entrypoint: uvicorn mv.api.main:app --host 0.0.0.0 --port 8002
     volumes:
       - .:/cliente/minera
-      - ./datos/fastembed_cache:/home/asistente/.cache
+      - ./datos/fastembed_cache:/home/asistente/.cache:ro
     depends_on:
       mk:
         condition: service_healthy
@@ -65,10 +65,11 @@ services:
       interval: 5s
       timeout: 3s
       retries: 24
-      start_period: 60s
+      start_period: 30s
 
   ma:
     <<: *base
+    image: ${ILLARI_MA_IMAGE:-illari-ma:local}
     entrypoint: uvicorn ma.api.main:app --host 0.0.0.0 --port 8001
     environment:
       CLIENTE_DIR: /cliente/minera
@@ -90,6 +91,7 @@ services:
 
   m2:
     <<: *base
+    image: ${ILLARI_M2_IMAGE:-illari-m2:local}
     entrypoint:
       - sh
       - -c
@@ -100,7 +102,7 @@ services:
       - .:/cliente/minera
       - ../Illari/m2/configuracion/schemas:/app/m2/configuracion/schemas:ro
       - ../Illari/m2/core/adaptadores/llm/factory.py:/app/m2/core/adaptadores/llm/factory.py:ro
-      - ${CHAT_YAML:-./configuracion/chat.yaml}:/cliente/minera/configuracion/chat.yaml:ro
+      - ${CHAT_YAML:-./configuracion/chat.eco.yaml}:/cliente/minera/configuracion/chat.yaml:ro
     depends_on:
       mv-api:
         condition: service_started
@@ -124,4 +126,3 @@ services:
 networks:
   red_illari:
     driver: bridge
-
