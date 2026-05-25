@@ -95,7 +95,7 @@ usuarios:
       dimensiones:
         planta: ["todas"]
         ambito: ["Seguridad Ocupacional"]
-        clasificacion: "restringido"
+        clasificacion: "Restringido"
 
   - user_id: "operador.chancado@test"
     nombre_ui: "Operador Chancado"
@@ -108,7 +108,7 @@ usuarios:
       dimensiones:
         planta: [chancado]
         ambito: ["Medioambiente"]
-        clasificacion: "interno"
+        clasificacion: "Interno"
 
   - user_id: "auditor.ambiental@test"
     nombre_ui: "Auditor Ambiental"
@@ -134,4 +134,4 @@ usuarios:
       dimensiones:
         planta: [molienda]
         ambito: ["Medioambiente"]
-        clasificacion: "interno"
+        clasificacion: "Interno"
