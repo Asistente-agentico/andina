@@ -1,0 +1,18 @@
+kpi:
+  id: concentracion-maxima-ultima-jornada
+  titulo: "Concentración de polvo última jornada (por punto)"
+  descripcion: |
+    Concentración de polvo respirable en mg/m³ medida por punto de evaluación
+    en la última jornada de medición global.
+    Fuente: modelo oro M00004.
+  umbral: 3.0
+  severidad:
+    - rango: [null, 1.99]
+      nivel: ok
+    - rango: [2.0, 2.99]
+      nivel: warning
+    - rango: [3.0, null]
+      nivel: critico
+  gobernanza:
+    modelo_oro: M00004
+    dimensiones_requeridas: [planta]

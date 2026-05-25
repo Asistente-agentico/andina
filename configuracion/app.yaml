@@ -44,8 +44,8 @@ modulos:
     endpoints: []
   kpis:
     version: "0.8.0"
-    habilitado: false
-    base_url: null
+    habilitado: true
+    base_url: "http://localhost:8006"
     endpoints: []
 
 proyecto_transformacion: modelos

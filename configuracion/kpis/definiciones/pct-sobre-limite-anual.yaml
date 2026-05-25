@@ -1,0 +1,18 @@
+kpi:
+  id: pct-sobre-limite-anual
+  titulo: "% de muestras sobre límite DS 594 (anual)"
+  descripcion: |
+    Porcentaje de registros de concentración de polvo respirable que superaron
+    el límite interno DS 594, desagregado por planta y año.
+    Fuente: modelo oro M00002. Escala 0–100 (valor 5.3 = 5.3%).
+  umbral: 5.0
+  severidad:
+    - rango: [null, 4.9]
+      nivel: ok
+    - rango: [5.0, 14.9]
+      nivel: warning
+    - rango: [15.0, null]
+      nivel: critico
+  gobernanza:
+    modelo_oro: M00002
+    dimensiones_requeridas: [planta]

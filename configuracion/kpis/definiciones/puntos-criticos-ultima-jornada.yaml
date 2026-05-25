@@ -1,0 +1,19 @@
+kpi:
+  id: puntos-criticos-ultima-jornada
+  titulo: "Puntos sobre límite en última jornada (por planta)"
+  descripcion: |
+    Conteo de puntos de evaluación cuya concentración superó el límite interno
+    DS 594 en la última jornada de medición global, agrupado por planta.
+    Devuelve 0 cuando todos los puntos están dentro del límite.
+    Fuente: modelo oro M00004.
+  umbral: 0
+  severidad:
+    - rango: [null, 0]
+      nivel: ok
+    - rango: [1, 2]
+      nivel: warning
+    - rango: [3, null]
+      nivel: critico
+  gobernanza:
+    modelo_oro: M00004
+    dimensiones_requeridas: [planta]
