@@ -208,6 +208,62 @@ Los resultados se guardan en `tests/results/` (gitignoreado).
 
 ---
 
+### Stack de desarrollo UI (MK + MA + MV + M2 + M3 + UI)
+
+Levanta el stack completo de UI con imágenes Docker por módulo.
+Requiere haber corrido el **E2E ingesta** al menos una vez (puebla `datos/qdrant_mv/`).
+
+#### 1. Construir imágenes
+
+```bash
+# Linux/macOS — construye illari-{base,mk,ma,mv,m2,m3,m1,ui}:local
+bash scripts/build-imagenes.sh
+
+# Windows
+.\scripts\build-imagenes.ps1
+```
+
+Versiones en `imagenes/versiones.yaml`. El script construye `base` automáticamente
+si hay módulos backend en la lista. Las imágenes se etiquetan `:local` y `:<version>`.
+
+#### 2. Levantar el stack
+
+```bash
+# Linux/macOS
+bash scripts/dev-ui.sh up
+
+# Otros subcomandos
+bash scripts/dev-ui.sh logs   # tail -f de todos los servicios
+bash scripts/dev-ui.sh ps     # estado de contenedores
+bash scripts/dev-ui.sh down   # bajar y limpiar
+
+# Windows
+.\scripts\dev-ui.ps1 up
+```
+
+Requiere `MASTER_SECRET` en `minera/.env` o en el entorno.
+
+Variables opcionales en `.env` para sobreescribir las imágenes por defecto:
+
+```
+ILLARI_MK_IMAGE=illari-mk:local
+ILLARI_MA_IMAGE=illari-ma:local
+ILLARI_MV_IMAGE=illari-mv:local
+ILLARI_M2_IMAGE=illari-m2:local
+ILLARI_M3_IMAGE=illari-m3:local
+ILLARI_UI_IMAGE=illari-ui:local
+```
+
+Puertos publicados: MA → `:8001`, M2 → `:8004`, M3 → `:8005`, UI → `:3000`.
+MV (`mv-api`) es solo red interna — no se expone al host (ADR-015 §D4).
+
+> **Qdrant lock**: si MV arranca con `mv_vector_store_fallo_startup` ("Storage folder
+> already accessed by another instance"), hay un contenedor del stack de ingesta con
+> el directorio `datos/qdrant_mv/` montado. Bajarlo antes de levantar el stack UI:
+> `bash scripts/dev-ui.sh down` + `docker compose -f docker-compose.ingesta.yml down`.
+
+---
+
 ## Contexto de negocio
 
 Ver [`analisis/preguntas.md`](analisis/preguntas.md) — preguntas del cliente, reglas,

@@ -31,7 +31,7 @@ _read_env() {
         val=$(grep -E "^\s*(export\s+)?${var}\s*=" "$ENV_FILE" \
             | head -1 | sed -E "s/^\s*(export\s+)?${var}\s*=\s*//" \
             | tr -d '"'"'" | xargs || true)
-        [[ -n "$val" ]] && export "$var=$val"
+        if [[ -n "$val" ]]; then export "$var=$val"; fi
     fi
 }
 _read_env MASTER_SECRET
