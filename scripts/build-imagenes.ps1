@@ -81,7 +81,7 @@ if ($Modulo.Count -eq 0) {
 # Si algún módulo backend está en la lista pero base no, agregar base primero
 $necesitaBase = ($Modulo | Where-Object { $modulosBackend -contains $_ }).Count -gt 0
 if ($necesitaBase -and ($Modulo -notcontains "base")) {
-    Write-Host "  (base agregado automáticamente — requerido por módulos backend)"
+    Write-Host "  (base agregado automaticamente - requerido por modulos backend)"
     $Modulo = @("base") + $Modulo
 }
 # base siempre primero
@@ -113,7 +113,7 @@ Write-Host ""
 
 foreach ($mod in $Modulo) {
     if (-not $versiones.ContainsKey($mod)) {
-        Write-Warning "Módulo '$mod' no está en versiones.yaml — omitiendo."
+        Write-Warning "Modulo '$mod' no esta en versiones.yaml - omitiendo."
         continue
     }
     $version    = $versiones[$mod]
@@ -136,7 +136,7 @@ foreach ($mod in $Modulo) {
         docker tag $tagLocal $tagRegistry
         docker push $tagRegistry
         if ($LASTEXITCODE -ne 0) { Write-Error "Push de '$mod' fallido."; exit $LASTEXITCODE }
-        Write-Host "  → pushed $tagRegistry"
+        Write-Host "  pushed $tagRegistry"
     }
 
     Write-Host "  OK: $tagLocal / $tagVersion"
