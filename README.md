@@ -266,5 +266,5 @@ MV (`mv-api`) es solo red interna — no se expone al host (ADR-015 §D4).
 
 ## Contexto de negocio
 
-Ver [`analisis/preguntas.md`](analisis/preguntas.md) — preguntas del cliente, reglas,
+Ver [`docs/preguntas.md`](docs/preguntas.md) — preguntas del cliente, reglas,
 marts y decisiones de diseño del caso.

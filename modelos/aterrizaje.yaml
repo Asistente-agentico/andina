@@ -11,7 +11,7 @@
 # las columnas de semana (72 en total) se procesan via SELECT * en bronce.
 #
 # Patrón de ingesta: overwrite + snapshot (Camino A).
-# DEUDA: no escala con el tiempo — ver analisis/preguntas.md.
+# DEUDA: no escala con el tiempo — ver docs/preguntas.md.
 #
 # Ruta de datos en el contenedor: montar ./datos en /datos al correr docker.
 #   docker run -v ./datos:/datos -v ./configuracion:/app/configuracion ...
