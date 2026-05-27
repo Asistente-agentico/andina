@@ -2,26 +2,26 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00018 — Para el sistema X, ¿cuándo se realizó la última mantención? (datamart M_EJECUCION_OT)
 regla:
-  id: P00001_M00001
+  id: P00018_M00009
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "Para el sistema X, ¿cuándo se realizó la última mantención?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [orden_nro, anio, semana_nro]
     separator: "_"
 
   privacidad:
     pii_estrategia: tokens
-    pii_tokens: []
+    pii_tokens: [responsable_nombre]
     estrategia_olvido: etiquetas
 
   gobernanza:
     dimensiones:
       planta: column:planta_canon
-      ambito: fiscalizacion
+      ambito: mantencion
       clasificacion: ""
     dimensiones_en_texto: []
 

@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00008 — ¿Por qué la máquina X no tuvo mantención? (datamart M_CAUSA_RAIZ)
 regla:
-  id: P00001_M00001
+  id: P00008_M00007
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Por qué la máquina X no tuvo mantención?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [orden_nro, anio, semana_nro]
     separator: "_"
 
   privacidad:
@@ -21,7 +21,7 @@ regla:
   gobernanza:
     dimensiones:
       planta: column:planta_canon
-      ambito: fiscalizacion
+      ambito: cruzado
       clasificacion: ""
     dimensiones_en_texto: []
 

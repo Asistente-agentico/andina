@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00006 — ¿Cuál es la planta con los puntos de medición más bajos? (datamart M_PROMEDIOS_PLANTA)
 regla:
-  id: P00001_M00001
+  id: P00006_M00002
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Cuál es la planta con los puntos de medición más bajos?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [planta_canon, anio, semana_nro]
     separator: "_"
 
   privacidad:

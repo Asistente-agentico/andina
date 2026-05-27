@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00012 — ¿Qué máquinas fueron medidas en la semana X? (datamart M_COBERTURA_SEMANAL)
 regla:
-  id: P00001_M00001
+  id: P00012_M00004
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Qué máquinas fueron medidas en la semana X?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [maquina_gen_nombre, anio, semana_nro]
     separator: "_"
 
   privacidad:

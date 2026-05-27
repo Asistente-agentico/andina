@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00017 — ¿Cuál de todas las plantas tiene la tendencia de crecer en polución alto y cuáles son esos puntos de medición? (datamart M_TENDENCIAS)
 regla:
-  id: P00001_M00001
+  id: P00017_M00006
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Cuál de todas las plantas tiene la tendencia de crecer en polución alto y cuáles son esos puntos de medición?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [planta_canon, punto_nro, anio]
     separator: "_"
 
   privacidad:

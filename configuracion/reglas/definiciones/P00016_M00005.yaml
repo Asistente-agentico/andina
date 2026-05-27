@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00016 — ¿Entre qué semanas ocurre el mayor número de puntos con bajo grado de polución en la planta X? (datamart M_VENTANAS_TEMPORALES)
 regla:
-  id: P00001_M00001
+  id: P00016_M00005
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Entre qué semanas ocurre el mayor número de puntos con bajo grado de polución en la planta X?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [planta_canon, anio, semana_nro]
     separator: "_"
 
   privacidad:

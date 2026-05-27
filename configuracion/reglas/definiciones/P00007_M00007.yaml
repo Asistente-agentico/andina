@@ -2,15 +2,15 @@ version: "1.0"
 metadata:
   cliente_id: CODELCO-ANDINA
 
-# P00001 — ¿Dónde está el punto de medición más alto esta semana? (datamart M_RANKING_SEMANAL)
+# P00007 — ¿Por qué el punto X tiene altos niveles de medición? (datamart M_CAUSA_RAIZ)
 regla:
-  id: P00001_M00001
+  id: P00007_M00007
   identidad:
     estado: vigente
-    descripcion: "¿Dónde está el punto de medición más alto esta semana?"
+    descripcion: "¿Por qué el punto X tiene altos niveles de medición?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio, semana_nro]
+    columns: [punto_nro, anio, semana_nro, condicion_nombre]
     separator: "_"
 
   privacidad:
@@ -21,7 +21,7 @@ regla:
   gobernanza:
     dimensiones:
       planta: column:planta_canon
-      ambito: fiscalizacion
+      ambito: cruzado
       clasificacion: ""
     dimensiones_en_texto: []
 
