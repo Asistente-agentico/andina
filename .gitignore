@@ -1,5 +1,6 @@
 # Datos del cliente — PII y archivos grandes
 datos/
+modelos/Fuentes de Datos/
 
 # Vector store local (generado por chunker --embed)
 qdrant_data/
