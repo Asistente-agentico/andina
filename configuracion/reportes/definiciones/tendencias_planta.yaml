@@ -1,0 +1,19 @@
+version: "1.0"
+reporte_id: tendencias_planta
+titulo: Tendencia anual de polución por planta
+descripcion: >
+  Identifica las plantas con tendencia creciente, estable o decreciente en la
+  concentración de polvo respirable a lo largo del año. Calcula la pendiente de
+  regresión lineal sobre el promedio semanal por planta y entrega el detalle
+  de los puntos de medición de la planta con mayor tendencia creciente.
+  Fuente: modelo dbt oro_p00017.
+  Gobernanza: filtra por planta (enum). Ver dimensiones_requeridas.
+formato: [json, xlsx]
+parametros:
+  - nombre: anio
+    tipo: entero
+    requerido: false
+gobernanza:
+  modelo_oro: M00006
+  dimensiones_requeridas:
+    - planta

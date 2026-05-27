@@ -1,0 +1,23 @@
+version: "1.0"
+reporte_id: ot_no_ejecutadas
+titulo: Órdenes de Trabajo no ejecutadas
+descripcion: >
+  Listado de Órdenes de Trabajo de ventilación cuya ejecución no se completó
+  en la fecha programada (cumpl_prog = 0). Entrega el motivo principal de la
+  no-ejecución (falta de repuestos, no entrega de operaciones o falta de
+  personal), la fecha original y la fecha de reprogramación, agrupado por
+  planta y por motivo.
+  Fuente: modelo dbt oro_p00024.
+  Gobernanza: filtra por planta (enum). Ver dimensiones_requeridas.
+formato: [json, xlsx]
+parametros:
+  - nombre: anio
+    tipo: entero
+    requerido: false
+  - nombre: semana
+    tipo: entero
+    requerido: false
+gobernanza:
+  modelo_oro: M00008
+  dimensiones_requeridas:
+    - planta
