@@ -1,0 +1,16 @@
+condicion_codigo,nombre,severidad_default,peso_causa_default
+CHUTE_DETERIORO_GRAVE,Chute deterioro grave,grave,1.0
+CHUTE_DETERIORO_MEDIO,Chute deterioro medio,medio,0.65
+GUARDERA_DESGASTE,Guardera desgastada,medio,0.55
+HARNERO_CERRAMIENTO_ROTO,Cerramiento de harnero roto,grave,0.9
+PLANCHAS_MAL_AJUSTE,Planchas con mal ajuste,medio,0.55
+MAQCTRL_DETENIDA,Maquina control polvo detenida,grave,0.8
+FALTA_REPUESTOS,Falta de repuestos,medio,0.9
+OT_NO_EJECUTADA,OT no ejecutada,medio,0.55
+HUMECTACION_BAJA_PRESION,Humectacion con baja presion,medio,0.65
+POLVO_ACUMULADO_ALTO,Polvo acumulado en piso (alto),grave,0.55
+POLVO_ACUMULADO_BAJO,Polvo acumulado en piso (bajo),leve,0.15
+MINERAL_FUGITIVO,Mineral fugitivo,medio,0.4
+HUMEDAD_BAJA,Humedad mineral baja,medio,0.3
+TPH_ALTO,TPH sobre rango,medio,0.3
+ASEO_DEFICIENTE,Aseo industrial deficiente,leve,0.15

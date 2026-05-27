@@ -1,0 +1,13 @@
+problema_raiz_codigo,nombre,familia,descripcion
+A_CHUTE_DETERIORO,Chute con deterioro grave,A_componente_correa,Chute traspaso con rotura o desgaste
+A_GUARDERA_DESGASTE,Guardera correa desgastada,A_componente_correa,Guardera con desgaste y fugas de mineral
+A_HARNERO_CERRAMIENTO,Cerramiento de harnero roto,A_componente_correa,Cerramiento de harnero con rotura
+A_PLANCHAS_MAL_AJUSTE,Planchas con mal ajuste,A_componente_correa,Chute recto con mal ajuste de planchas
+B_MAQ_CTRL_DETENIDA,Maquina control polvo detenida,B_maqctrl_falla,Equipo abatidor o renovador detenido por falla
+B_FALTA_REPUESTOS,Falta de repuestos,B_maqctrl_falla,OT no ejecutada por falta de repuestos
+B_OT_NO_EJECUTADA,OT planificada no ejecutada,B_maqctrl_falla,OT programada no se llevo a cabo
+B_HUMECTACION_BAJA_PRESION,Humectacion con baja presion,B_maqctrl_falla,Sistema de humectacion operando bajo rango
+C_POLVO_ACUMULADO,Polvo acumulado en piso/retorno,C_ambiental_aseo,Aseo industrial deficiente
+C_MINERAL_FUGITIVO,Mineral fugitivo,C_ambiental_aseo,Derrame de mineral en area
+C_HUMEDAD_BAJA,Humedad mineral baja,C_ambiental_aseo,Mineral entrando con humedad bajo referencia
+C_TPH_ALTO,TPH sobre rango,C_ambiental_aseo,Tratamiento en TPH sobre rango operacional

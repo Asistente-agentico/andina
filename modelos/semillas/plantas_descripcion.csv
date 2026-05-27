@@ -1,0 +1,9 @@
+planta_canon,nombre_corto,nombre_largo,area,descripcion
+PRECHANCADO,Prechancado,Planta Prechancado,Chancado,Reduccion primaria de mineral
+CHANCADO_2_3,Chancado 2°-3°,Planta Chancado Secundario y Terciario,Chancado,Reduccion intermedia de mineral
+CHANCADO_FINO_3,Chancado Fino 3°,Planta Chancado Fino Terciario,Chancado,Reduccion fina paso 3
+CHANCADO_FINO_4,Chancado Fino 4°,Planta Chancado Fino Cuaternario,Chancado,Reduccion fina paso 4
+MOLIENDA_SAG,Molienda SAG,Planta Molienda SAG,Molienda,Molienda semi-autogena
+MOLIENDA_CONVENCIONAL,Molienda Convencional,Planta Molienda Convencional,Molienda,Molienda con bolas
+CDM,CDM,Centro de Distribucion de Mineral,Molienda,Distribucion y mezcla
+NODO_3500,Nodo 3500,Nodo de transferencia 3500,Chancado,Punto de transferencia cota 3500
