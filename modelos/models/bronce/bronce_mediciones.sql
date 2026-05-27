@@ -1,8 +1,8 @@
 {#-
-    bronce_mediciones — Transforma las 9 hojas de medición del formato ancho (CSV)
+    bronce_mediciones — Transforma las 9 hojas de medición del formato ancho
     al formato largo: una fila por (planta, punto_evaluacion, anio, semana).
 
-    Fuente: 9 snapshots (uno por área de planta), Camino A (overwrite + snapshot).
+    Fuente: 9 snapshots (uno por área de planta), creados desde las sources puntos_*.
     Macro: unpivot_mediciones_planta (maneja el UNPIVOT + metadata + filtros).
 
     Columnas de salida:
@@ -13,24 +13,24 @@
 {{
     config(
         materialized='view',
-        tags=['capa:bronce', 'dominio:minera_prueba']
+        tags=['capa:bronce', 'dominio:codelco_andina']
     )
 }}
 
-{{ unpivot_mediciones_planta(ref('snap_mediciones_prechancado'),         'Pre-Chancado')           }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_prechancado'),           'Prechancado')             }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_chancado_2_3'),        'Chancado 2° y 3°')       }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_chancado_2_3'),          'Chancado 2° y 3°')        }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_terciario'),           'Chancado Fino 3°')       }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_terciario'),             'Chancado Fino 3°')        }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_cuaternario'),         'Chancado Fino 4°')       }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_cuaternario'),           'Chancado Fino 4°')        }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_molienda_sag'),        'Molienda SAG')           }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_molienda_sag'),          'Molienda SAG')            }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_molienda_convencional'), 'Molienda Convencional') }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_molienda_convencional'), 'Molienda Convencional')   }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_cdm_1'),               'CDM')                    }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_cdm_1'),                 'CDM Linea 1')             }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_cdm_2'),               'CDM')                    }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_cdm_2'),                 'CDM Linea 2')             }}
 UNION ALL
-{{ unpivot_mediciones_planta(ref('snap_mediciones_nodo'),                'Nodo 3500')              }}
+{{ unpivot_mediciones_planta(ref('snap_puntos_nodo'),                  'Nodo 3500')               }}

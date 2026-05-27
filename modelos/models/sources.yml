@@ -2,27 +2,47 @@ version: 2
 
 sources:
   - name: landing
-    description: "Tablas de landing cargadas desde los CSV de mediciones ambientales."
+    description: "Tablas de landing del dominio Codelco Andina — ventilación minera (fiscalización + mantención)."
     tables:
-      - name: mediciones_prechancado
-        description: "Área Pre-Chancado"
-      - name: mediciones_chancado_2_3
-        description: "Área Chancado 2° y 3°"
-      - name: mediciones_terciario
-        description: "Área Chancado Fino 3°"
-      - name: mediciones_cuaternario
-        description: "Área Chancado Fino 4°"
-      - name: mediciones_molienda_sag
-        description: "Área Molienda SAG"
-      - name: mediciones_molienda_convencional
-        description: "Área Molienda Convencional"
-      - name: mediciones_cdm_1
-        description: "Área CDM — Línea 1"
-      - name: mediciones_cdm_2
-        description: "Área CDM — Línea 2"
-      - name: mediciones_nodo
-        description: "Área Nodo 3500"
-      - name: resumen_concentraciones
-        description: "Resumen ejecutivo — todas las áreas"
-      - name: datos_consolidados
-        description: "Tabla consolidada de todos los puntos de muestreo"
+      # ----------------------------------------------------------------------
+      # Fiscalización — mediciones de polvo respirable por planta (9 áreas)
+      # Origen: Puntos_Criticos_Semana_19_2026_LIMPIO.xlsx
+      # ----------------------------------------------------------------------
+      - name: puntos_prechancado
+        description: "Mediciones de polvo respirable — área Prechancado"
+      - name: puntos_chancado_2_3
+        description: "Mediciones de polvo respirable — área Chancado Secundario y Terciario"
+      - name: puntos_terciario
+        description: "Mediciones de polvo respirable — área Chancado Fino 3°"
+      - name: puntos_cuaternario
+        description: "Mediciones de polvo respirable — área Chancado Fino 4°"
+      - name: puntos_molienda_sag
+        description: "Mediciones de polvo respirable — área Molienda SAG"
+      - name: puntos_molienda_convencional
+        description: "Mediciones de polvo respirable — área Molienda Convencional"
+      - name: puntos_cdm_1
+        description: "Mediciones de polvo respirable — área CDM Línea 1"
+      - name: puntos_cdm_2
+        description: "Mediciones de polvo respirable — área CDM Línea 2"
+      - name: puntos_nodo
+        description: "Mediciones de polvo respirable — área Nodo 3500"
+
+      # ----------------------------------------------------------------------
+      # Mantención — Programa Semana 21 2026 (Órdenes de Trabajo)
+      # Origen: Programa_Semana_21_2026_Ventilacion_LIMPIO.xlsx
+      # ----------------------------------------------------------------------
+      - name: programa_general
+        description: "Programa de OT general — fallback para CDM Línea 1 y CDM Línea 2"
+      - name: programa_chancado_fino
+        description: "Programa de OT — Chancado Secundario y Terciario, Chancado Terciario y Cuaternario"
+      - name: programa_molienda
+        description: "Programa de OT — Molienda SAG"
+      - name: programa_chancado_primario
+        description: "Programa de OT — Prechancado, Nodo 3500"
+
+      # ----------------------------------------------------------------------
+      # Catálogo — equipos de control de polvo
+      # Origen: Equipos_de_Ventilacion_DAND_LIMPIO.xlsx
+      # ----------------------------------------------------------------------
+      - name: equipos_ventilacion_catalogo
+        description: "Catálogo de equipos de ventilación y control de polvo (DAND) — tipo y familia por máquina"

@@ -1,20 +1,22 @@
 {#-
-    M00004 — M_COBERTURA_SEMANAL
-    Datamart oro: cobertura de mediciones por máquina generadora y semana.
-    Una fila por (máquina_generadora, punto, semana) con la medición asociada.
-    Sirve a la pregunta:
-      P00012 — ¿qué máquinas fueron medidas en la semana X?
+    M00005 — M_VENTANAS_TEMPORALES
+    Datamart oro: serie de mediciones por (planta, punto, semana) para identificar
+    ventanas temporales de alta o baja polución.
+    Sirve a las preguntas:
+      P00013 — entre qué semanas ocurre el mayor número de puntos con alta polución en planta X
+      P00014 — entre qué semanas ocurre el mayor número de altas concentraciones en el punto X
+      P00015 — entre qué semanas ocurre el mayor número de bajas concentraciones en el punto X
+      P00016 — entre qué semanas ocurre el mayor número de puntos con baja polución en planta X
     Ámbito: fiscalizacion (denormalizado como literal).
 
     Construcción desde silver:
-      L_MEDICION + S_MEDICION_VALOR     (medición del punto en la semana)
-      L_PUNTO_MAQGEN + S_MAQGEN_DESCR   (máquina generadora asociada al punto, 1:1)
-      L_PUNTO_PLANTA + S_PLANTA_DESCR   (planta canónica)
+      L_MEDICION + S_MEDICION_VALOR     (concentraciones por punto y semana)
+      L_PUNTO_PLANTA                    (planta canónica)
       S_PUNTO_DESCR                     (nombre del punto)
       S_SEMANA_DESCR                    (fecha calendario)
 
-    Los filtros particulares (filtrar por anio/semana_nro específicos) viven en
-    configuracion/reglas/consultas/.
+    Los filtros particulares (ventana móvil de 4 semanas, umbrales >= 2.5 o BETWEEN 0.01 y 1.0,
+    LIMIT 1) viven en configuracion/reglas/consultas/.
 -#}
 {{
     config(
@@ -30,7 +32,6 @@ WITH medicion AS (
         lm.anio,
         lm.semana_nro,
         sm.concentracion_mg_m3,
-        sm.fecha_medicion,
         sm.estado
     FROM {{ ref('silver_relacion_medicion') }} lm
     LEFT JOIN {{ ref('silver_detalle_medicion') }} sm
@@ -54,18 +55,6 @@ planta AS (
     FROM {{ ref('silver_relacion_punto_planta') }} lpp
 ),
 
-maqgen AS (
-    SELECT
-        lpm.ent_punto_medicion_hk,
-        lpm.maquina_gen_codigo,
-        smg.maquina_gen_nombre,
-        smg.tipo_maquina_gen
-    FROM {{ ref('silver_relacion_punto_maqgen') }} lpm
-    LEFT JOIN {{ ref('silver_detalle_maquina_generadora') }} smg
-        ON {{ huella_registro(['lpm.maquina_gen_codigo']) }} = smg.huella_registro
-       AND smg.valid_to IS NULL
-),
-
 semana AS (
     SELECT
         ss.huella_registro          AS ent_semana_hk,
@@ -77,21 +66,15 @@ semana AS (
 
 SELECT
     p.planta_canon,
-    mg.maquina_gen_codigo,
-    mg.maquina_gen_nombre,
-    mg.tipo_maquina_gen,
     m.punto_nro,
     pt.nombre_punto,
     m.anio,
     m.semana_nro,
     s.fecha_inicio_semana,
     s.fecha_fin_semana,
-    m.fecha_medicion,
     m.concentracion_mg_m3,
-    m.estado,
     'fiscalizacion'::text   AS ambito
 FROM medicion m
 LEFT JOIN punto  pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
 LEFT JOIN planta p  ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
-LEFT JOIN maqgen mg ON m.ent_punto_medicion_hk = mg.ent_punto_medicion_hk
 LEFT JOIN semana s  ON m.ent_semana_hk         = s.ent_semana_hk

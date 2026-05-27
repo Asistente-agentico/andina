@@ -15,24 +15,24 @@ models:
   minera_prueba:
     bronce:
       +materialized: view
-      +tags: ["capa:bronce", "dominio:minera_prueba"]
+      +tags: ["capa:bronce", "dominio:codelco_andina"]
     silver:
       +materialized: incremental
-      +incremental_strategy: merge
+      +incremental_strategy: append
       +unique_key: huella_registro
-      +tags: ["capa:silver", "dominio:minera_prueba"]
+      +tags: ["capa:silver", "dominio:codelco_andina"]
       detalles:
         +unique_key: ["huella_registro", "valid_from"]
         +incremental_strategy: append
     oro:
-      +tags: ["capa:oro", "dominio:minera_prueba"]
+      +tags: ["capa:oro", "dominio:codelco_andina"]
 
 seeds:
   minera_prueba:
     +schema: semillas
-    +tags: ["dominio:minera_prueba"]
+    +tags: ["dominio:codelco_andina"]
 
 snapshots:
   minera_prueba:
     +target_schema: instantaneos
-    +tags: ["capa:instantaneo", "dominio:minera_prueba"]
+    +tags: ["capa:instantaneo", "dominio:codelco_andina"]

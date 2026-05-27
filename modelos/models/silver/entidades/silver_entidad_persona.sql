@@ -5,8 +5,8 @@
     config(
         materialized='incremental',
         unique_key='huella_registro',
-        incremental_strategy='merge',
-        tags=['capa:silver', 'dominio:minera_prueba']
+        incremental_strategy='append',
+        tags=['capa:silver', 'dominio:codelco_andina']
     )
 }}
 
@@ -15,8 +15,6 @@ SELECT
     dni,
     tipo_dni,
     dni_pais_emisor,
-    nombre_completo,
-    tipo_persona,
     current_timestamp                                               AS _silver_loaded_at,
     'semillas.personas_alias'                                       AS _silver_fuente
 
@@ -24,9 +22,7 @@ FROM (
     SELECT DISTINCT
         dni,
         tipo_dni,
-        dni_pais_emisor,
-        nombre_completo,
-        tipo_persona
+        dni_pais_emisor
     FROM {{ ref('personas_alias') }}
 ) t
 

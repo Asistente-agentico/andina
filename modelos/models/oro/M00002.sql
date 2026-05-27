@@ -1,54 +1,62 @@
 {#-
-    P00002 — Resumen anual de concentración por área (planta).
-    Incluye: promedio, máximo, semanas medidas, semanas sobre el límite.
-    Chunk: uno por planta con resumen anual.
-    Temporal policy: append_only (acumula por anio).
+    M00002 — M_PROMEDIOS_PLANTA
+    Datamart oro: una fila por (planta, semana) con estadísticas agregadas de concentración.
+    Sirve a las preguntas:
+      P00003 — promedio de una planta
+      P00004 — promedio de todas las plantas (con ROLLUP en la consulta)
+      P00005 — planta con puntos más altos
+      P00006 — planta con puntos más bajos
+    Ámbito: fiscalizacion (denormalizado como literal).
+
+    Construcción desde silver:
+      L_MEDICION + S_MEDICION_VALOR     (concentraciones)
+      L_PUNTO_PLANTA                    (asociación punto-planta)
+      S_PLANTA_DESCR                    (nombre canónico)
+
+    Los filtros particulares de cada pregunta (filtrar planta X, LIMIT 1, etc.) viven
+    en configuracion/reglas/consultas/.
 -#}
 {{
     config(
-        materialized='table',
-        tags=['capa:oro', 'dominio:minera_prueba', 'regla:P00002']
+        tags=['capa:oro', 'dominio:codelco_andina']
     )
 }}
 
-WITH limite_interno AS (
-    SELECT MIN(concentracion_min_mg_m3) AS mg_m3
-    FROM {{ ref('semaforo_polvo_respirable') }}
-    WHERE es_sobre_limite_interno = true
+WITH medicion AS (
+    SELECT
+        lm.ent_punto_medicion_hk,
+        lm.anio,
+        lm.semana_nro,
+        sm.concentracion_mg_m3,
+        sm.estado
+    FROM {{ ref('silver_relacion_medicion') }} lm
+    LEFT JOIN {{ ref('silver_detalle_medicion') }} sm
+        ON lm.huella_registro = sm.huella_registro
+       AND sm.valid_to IS NULL
+    WHERE sm.estado = 'medido'
 ),
 
-base AS (
+planta AS (
     SELECT
-        planta,
-        anio,
-        semana,
-        concentracion_mg_m3,
-        punto_evaluacion
-    FROM {{ ref('bronce_mediciones') }}
-    WHERE concentracion_mg_m3 IS NOT NULL
+        lpp.ent_punto_medicion_hk,
+        lpp.planta_canon,
+        spd.nombre_planta
+    FROM {{ ref('silver_relacion_punto_planta') }} lpp
+    LEFT JOIN {{ ref('silver_detalle_planta') }} spd
+        ON {{ huella_registro(['lpp.planta_canon']) }} = spd.huella_registro
+       AND spd.valid_to IS NULL
 )
 
 SELECT
-    b.planta,
-    b.anio,
-    COUNT(DISTINCT b.semana)                              AS semanas_medidas,
-    CASE WHEN COUNT(DISTINCT b.semana) = 1
-         THEN 'semana medida' ELSE 'semanas medidas' END  AS semanas_label,
-    COUNT(DISTINCT b.punto_evaluacion)                    AS puntos_medidos,
-    CASE WHEN COUNT(DISTINCT b.punto_evaluacion) = 1
-         THEN 'punto' ELSE 'puntos' END                   AS puntos_label,
-    ROUND(AVG(b.concentracion_mg_m3), 3)                 AS concentracion_promedio_mg_m3,
-    ROUND(MAX(b.concentracion_mg_m3), 3)                 AS concentracion_max_mg_m3,
-    ROUND(MIN(b.concentracion_mg_m3), 3)                 AS concentracion_min_mg_m3,
-    COUNT(CASE WHEN b.concentracion_mg_m3 > li.mg_m3 THEN 1 END) AS registros_sobre_limite,
-    COUNT(*)                                              AS total_registros,
-    ROUND(
-        COUNT(CASE WHEN b.concentracion_mg_m3 > li.mg_m3 THEN 1 END) * 100.0 / COUNT(*),
-        1
-    )                                                     AS pct_sobre_limite,
-    li.mg_m3                                              AS limite_interno_mg_m3
-
-FROM base b
-CROSS JOIN limite_interno li
-GROUP BY b.planta, b.anio, li.mg_m3
-ORDER BY pct_sobre_limite DESC, concentracion_promedio_mg_m3 DESC
+    p.planta_canon,
+    p.nombre_planta,
+    m.anio,
+    m.semana_nro,
+    COUNT(*)                                          AS n_mediciones,
+    ROUND(AVG(m.concentracion_mg_m3)::numeric, 3)     AS promedio_mg_m3,
+    ROUND(MAX(m.concentracion_mg_m3)::numeric, 3)     AS maximo_mg_m3,
+    ROUND(MIN(m.concentracion_mg_m3)::numeric, 3)     AS minimo_mg_m3,
+    'fiscalizacion'::text                              AS ambito
+FROM medicion m
+LEFT JOIN planta p ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
+GROUP BY p.planta_canon, p.nombre_planta, m.anio, m.semana_nro

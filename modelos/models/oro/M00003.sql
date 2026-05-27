@@ -1,95 +1,109 @@
 {#-
-    P00003 — Condiciones completas de la medición con mayor concentración histórica por área.
-    Incluye: fecha, operador, técnico, horario, punto de medición exacto.
-    Chunk: uno por planta con el detalle completo de su peak histórico.
-    Temporal policy: vigente (siempre el peak más alto conocido).
+    M00003 — M_DETALLE_MEDICION
+    Datamart oro: detalle completo de cada medición (fecha, hora, responsables, motivo si no se midió).
+    Sirve a las preguntas:
+      P00009 — fecha y horario de la medición en el punto X de la planta Y
+      P00010 — quién fue el responsable de la medición
+      P00011 — por qué no se tomó la medición en la fecha X
+    Ámbito: fiscalizacion (denormalizado como literal).
+
+    Construcción desde silver:
+      L_MEDICION + S_MEDICION_VALOR     (fecha, hora, estado, motivo)
+      L_PUNTO_PLANTA + S_PLANTA_DESCR   (planta canónica)
+      S_PUNTO_DESCR                     (nombre del punto)
+      L_OT_RESPONSABLE + S_PERSONA_DESCR (responsable de la medición — operador y técnico)
+      S_SEMANA_DESCR                    (fecha calendario)
+
+    Los filtros particulares de cada pregunta (por punto, por planta, estado='no_medido') viven
+    en configuracion/reglas/consultas/.
 -#}
 {{
     config(
-        tags=['capa:oro', 'dominio:minera_prueba', 'regla:P00003']
+        tags=['capa:oro', 'dominio:codelco_andina']
     )
 }}
 
-WITH limite_interno AS (
-    SELECT MIN(concentracion_min_mg_m3) AS mg_m3
-    FROM {{ ref('semaforo_polvo_respirable') }}
-    WHERE es_sobre_limite_interno = true
-),
-
-ranked AS (
+WITH medicion AS (
     SELECT
-        planta,
-        punto_evaluacion,
-        anio,
-        semana,
-        concentracion_mg_m3,
-        fecha,
-        hora_inicio,
-        hora_termino,
-        operador_alias,
-        tecnico_alias,
-        ROW_NUMBER() OVER (
-            PARTITION BY planta
-            ORDER BY concentracion_mg_m3 DESC
-        ) AS rn
-    FROM {{ ref('bronce_mediciones') }}
-    WHERE concentracion_mg_m3 IS NOT NULL
+        lm.huella_registro          AS medicion_hk,
+        lm.ent_punto_medicion_hk,
+        lm.ent_semana_hk,
+        lm.punto_nro,
+        lm.anio,
+        lm.semana_nro,
+        sm.concentracion_mg_m3,
+        sm.fecha_medicion,
+        sm.hora_inicio,
+        sm.hora_termino,
+        sm.estado,
+        sm.motivo_no_medicion
+    FROM {{ ref('silver_relacion_medicion') }} lm
+    LEFT JOIN {{ ref('silver_detalle_medicion') }} sm
+        ON lm.huella_registro = sm.huella_registro
+       AND sm.valid_to IS NULL
 ),
 
-peak AS (
-    SELECT * FROM ranked WHERE rn = 1
-),
-
-con_personas AS (
+punto AS (
     SELECT
-        p.planta,
-        p.punto_evaluacion,
-        p.anio,
-        p.semana,
-        p.concentracion_mg_m3,
-        p.fecha,
-        p.hora_inicio,
-        p.hora_termino,
-        MAX(CASE WHEN ep_op.tipo_persona = 'operador' THEN ep_op.nombre_completo END) AS operador,
-        MAX(CASE WHEN ep_tc.tipo_persona = 'tecnico'  THEN ep_tc.nombre_completo END) AS tecnico,
-        MAX(CASE WHEN ep_op.tipo_persona = 'operador' THEN ep_op.dni END)             AS operador_dni,
-        MAX(CASE WHEN ep_tc.tipo_persona = 'tecnico'  THEN ep_tc.dni END)             AS tecnico_dni
-    FROM peak p
-    LEFT JOIN {{ ref('personas_alias') }} op_a
-        ON trim(p.operador_alias) = op_a.alias_fuente
-    LEFT JOIN {{ ref('silver_entidad_persona') }} ep_op
-        ON {{ huella_registro(['op_a.dni', 'op_a.tipo_dni', 'op_a.dni_pais_emisor']) }} = ep_op.huella_registro
-    LEFT JOIN {{ ref('personas_alias') }} tc_a
-        ON trim(p.tecnico_alias) = tc_a.alias_fuente
-    LEFT JOIN {{ ref('silver_entidad_persona') }} ep_tc
-        ON {{ huella_registro(['tc_a.dni', 'tc_a.tipo_dni', 'tc_a.dni_pais_emisor']) }} = ep_tc.huella_registro
-    GROUP BY
-        p.planta, p.punto_evaluacion, p.anio, p.semana,
-        p.concentracion_mg_m3, p.fecha, p.hora_inicio, p.hora_termino
+        sp.huella_registro          AS ent_punto_medicion_hk,
+        sp.nombre_punto
+    FROM {{ ref('silver_detalle_punto_medicion') }} sp
+    WHERE sp.valid_to IS NULL
+),
+
+planta AS (
+    SELECT
+        lpp.ent_punto_medicion_hk,
+        lpp.planta_canon
+    FROM {{ ref('silver_relacion_punto_planta') }} lpp
+),
+
+semana AS (
+    SELECT
+        ss.huella_registro          AS ent_semana_hk,
+        ss.fecha_inicio_semana,
+        ss.fecha_fin_semana
+    FROM {{ ref('silver_detalle_semana') }} ss
+    WHERE ss.valid_to IS NULL
+),
+
+responsables AS (
+    SELECT
+        m.medicion_hk,
+        MAX(CASE WHEN sp.tipo_persona = 'operador' THEN sp.nombre_completo END) AS operador_panel,
+        MAX(CASE WHEN sp.tipo_persona = 'tecnico'  THEN sp.nombre_completo END) AS tecnico_higiene
+    FROM medicion m
+    LEFT JOIN {{ ref('silver_relacion_ot_responsable') }} lor
+        ON lor.orden_nro IS NULL  -- placeholder: medición no asocia OT, ver TODO abajo
+    LEFT JOIN {{ ref('silver_detalle_persona') }} sp
+        ON lor.ent_persona_hk = sp.huella_registro
+       AND sp.valid_to IS NULL
+    GROUP BY m.medicion_hk
 )
 
+-- TODO: el modelo actual no tiene un link directo "medición ↔ persona".
+-- Para resolver operador/técnico cuando exista la fuente, agregar un link L_MEDICION_RESPONSABLE
+-- o resolver vía bronce_mediciones.operador_alias / tecnico_alias contra personas_alias.
+
 SELECT
-    cp.planta,
-    cp.punto_evaluacion,
-    cp.anio,
-    cp.semana,
-    cp.concentracion_mg_m3,
-    ROUND(cp.concentracion_mg_m3 / li.mg_m3, 2)    AS veces_sobre_limite,
-    cp.fecha,
-    cp.hora_inicio,
-    cp.hora_termino,
-    cp.operador,
-    cp.operador_dni,
-    cp.tecnico,
-    cp.tecnico_dni,
-    li.mg_m3                                        AS limite_interno_mg_m3,
-    s.nivel                                         AS nivel_semaforo,
-    s.color                                         AS color_semaforo,
-    s.etiqueta                                      AS etiqueta_semaforo
-FROM con_personas cp
-CROSS JOIN limite_interno li
-LEFT JOIN {{ ref('semaforo_polvo_respirable') }} s
-    ON cp.concentracion_mg_m3 >= s.concentracion_min_mg_m3
-    AND (cp.concentracion_mg_m3 < s.concentracion_max_mg_m3
-         OR s.concentracion_max_mg_m3 IS NULL)
-ORDER BY cp.planta
+    p.planta_canon,
+    m.punto_nro,
+    pt.nombre_punto,
+    m.anio,
+    m.semana_nro,
+    s.fecha_inicio_semana,
+    s.fecha_fin_semana,
+    m.fecha_medicion,
+    m.hora_inicio,
+    m.hora_termino,
+    m.concentracion_mg_m3,
+    m.estado,
+    m.motivo_no_medicion,
+    r.operador_panel,
+    r.tecnico_higiene,
+    'fiscalizacion'::text   AS ambito
+FROM medicion m
+LEFT JOIN punto       pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
+LEFT JOIN planta      p  ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
+LEFT JOIN semana      s  ON m.ent_semana_hk         = s.ent_semana_hk
+LEFT JOIN responsables r ON m.medicion_hk           = r.medicion_hk
