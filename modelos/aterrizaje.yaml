@@ -1,14 +1,28 @@
-# landing.yaml — Caso Minera (prueba)
+# landing.yaml — Caso Codelco Andina (demo control de polvo respirable en ventilación minera)
 #
-# Fuente: planilla Excel "Puntos Criticos Semana 19- 2026.xlsx", exportada
-# a CSV por hoja. Estructura irregular: fila 1 = título, fila 2 = números
-# de semana como encabezados (1..52 + repetición año siguiente), filas
-# siguientes mezclan metadatos (fecha, operador, técnico, horario) con
-# valores de concentración por punto de medición.
+# Fuentes:
+#   1) Planilla Excel "Puntos Criticos Semana 19 2026 LIMPIO.xlsx", exportada
+#      a CSV por hoja (9 áreas de planta). Estructura: fila 1 = título, fila 2
+#      = números de semana como encabezados (semanas 1..52 de 2025 + 1..19 de
+#      2026), filas siguientes mezclan metadatos (operador, técnico, fecha,
+#      horario) con valores de concentración por punto de medición.
+#
+#   2) Planilla Excel "Programa Semana 21 2026 Ventilacion LIMPIO.xlsx",
+#      exportada a CSV por hoja (4 hojas: Programa, Chancado Fino, Molienda,
+#      Chancado Primario). Listado de Órdenes de Trabajo programadas con
+#      datos de planificación y ejecución real.
 #
 # El modelo dbt bronce de cada fuente maneja el parseo de esta estructura.
-# schema_columnas declara solo la columna de etiqueta (primera columna);
-# las columnas de semana (72 en total) se procesan via SELECT * en bronce.
+# Para mediciones, schema_columnas declara solo la columna de etiqueta
+# (primera columna); las columnas de semana se procesan via SELECT * en
+# bronce. Para OT, schema_columnas declara las columnas del header de la
+# hoja.
+#
+# Hard rules aplicadas en los CSV (DV Guru):
+#   - Cast a texto + trim + UPPER en BK (Orden, Ubicación técnica, etc.)
+#   - Coalesce NULL → -1 en BK (zero-key)
+#   - Fechas en ISO 8601 + Z (UTC): YYYY-MM-DDTHH:MM:SSZ
+#   - Encoding UTF-8
 #
 # Patrón de ingesta: overwrite + snapshot (Camino A).
 # DEUDA: no escala con el tiempo — ver docs/preguntas.md.
@@ -18,13 +32,17 @@
 
 version: "1.2"
 metadata:
-  cliente_id: minera_prueba
-  descripcion: Mediciones de concentración de polvo respirable por área de planta
+  cliente_id: codelco_andina
+  descripcion: Mediciones de polvo respirable y Órdenes de Trabajo de ventilación minera
 
 landing:
-  - nombre: mediciones_prechancado
+  # =====================================================================
+  # Fiscalización — mediciones de polvo respirable por área de planta
+  # Origen: Puntos_Criticos_Semana_19_2026_LIMPIO.xlsx
+  # =====================================================================
+  - nombre: puntos_prechancado
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área Pre-Chancado
+    descripcion: Mediciones semanales de polvo respirable — área Prechancado
     formato: csv
     ubicacion: /datos/csv/Prechancado.csv
     schema_columnas:
@@ -36,9 +54,9 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_chancado_2_3
+  - nombre: puntos_chancado_2_3
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área Chancado 2° y 3°
+    descripcion: Mediciones semanales de polvo respirable — área Chancado Secundario y Terciario
     formato: csv
     ubicacion: /datos/csv/2_y_3.csv
     schema_columnas:
@@ -50,9 +68,9 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_terciario
+  - nombre: puntos_terciario
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área Chancado Terciario
+    descripcion: Mediciones semanales de polvo respirable — área Chancado Fino 3°
     formato: csv
     ubicacion: /datos/csv/Terciario.csv
     schema_columnas:
@@ -64,9 +82,9 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_cuaternario
+  - nombre: puntos_cuaternario
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área Chancado Cuaternario
+    descripcion: Mediciones semanales de polvo respirable — área Chancado Fino 4°
     formato: csv
     ubicacion: /datos/csv/Cuaternario.csv
     schema_columnas:
@@ -78,7 +96,7 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_molienda_sag
+  - nombre: puntos_molienda_sag
     lakehouse: duckdb
     descripcion: Mediciones semanales de polvo respirable — área Molienda SAG
     formato: csv
@@ -92,7 +110,7 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_molienda_convencional
+  - nombre: puntos_molienda_convencional
     lakehouse: duckdb
     descripcion: Mediciones semanales de polvo respirable — área Molienda Convencional
     formato: csv
@@ -106,9 +124,9 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_cdm_1
+  - nombre: puntos_cdm_1
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área CDM (sector 1)
+    descripcion: Mediciones semanales de polvo respirable — área CDM Línea 1
     formato: csv
     ubicacion: /datos/csv/CDM_(1).csv
     schema_columnas:
@@ -120,9 +138,9 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_cdm_2
+  - nombre: puntos_cdm_2
     lakehouse: duckdb
-    descripcion: Mediciones semanales de polvo respirable — área CDM (sector 2)
+    descripcion: Mediciones semanales de polvo respirable — área CDM Línea 2
     formato: csv
     ubicacion: /datos/csv/CDM_(2).csv
     schema_columnas:
@@ -134,7 +152,7 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: mediciones_nodo
+  - nombre: puntos_nodo
     lakehouse: duckdb
     descripcion: Mediciones semanales de polvo respirable — área Nodo 3500
     formato: csv
@@ -148,30 +166,62 @@ landing:
     snapshot_strategy: check_cols
     snapshot_check_cols: [etiqueta]
 
-  - nombre: resumen_concentraciones
+  # =====================================================================
+  # Mantención — Órdenes de Trabajo del Programa de ventilación
+  # Origen: Programa_Semana_21_2026_Ventilacion_LIMPIO.xlsx
+  # =====================================================================
+  - nombre: programa_general
     lakehouse: duckdb
-    descripcion: Resumen ejecutivo de concentraciones por área y punto — todas las semanas
+    descripcion: Programa de OT general — fallback para CDM Línea 1 y CDM Línea 2
     formato: csv
-    ubicacion: /datos/csv/Resumen.csv
+    ubicacion: /datos/csv/Programa.csv
     schema_columnas:
-      - {nombre: etiqueta, tipo: string, nullable: true}
+      - {nombre: orden_nro, tipo: string, nullable: false}
     frecuencia: {tipo: batch, cron: "0 8 * * 1"}
     ingestion_pattern: overwrite
     frecuencia_actualizacion: semanal
     enable_snapshots: true
     snapshot_strategy: check_cols
-    snapshot_check_cols: [etiqueta]
+    snapshot_check_cols: [orden_nro]
 
-  - nombre: datos_consolidados
+  - nombre: programa_chancado_fino
     lakehouse: duckdb
-    descripcion: Tabla consolidada de todos los puntos de muestreo con concentraciones por semana
+    descripcion: Programa de OT — Chancado Secundario y Terciario, Chancado Terciario y Cuaternario
     formato: csv
-    ubicacion: /datos/csv/Datos.csv
+    ubicacion: /datos/csv/Chancado_Fino.csv
     schema_columnas:
-      - {nombre: etiqueta, tipo: string, nullable: true}
+      - {nombre: orden_nro, tipo: string, nullable: false}
     frecuencia: {tipo: batch, cron: "0 8 * * 1"}
     ingestion_pattern: overwrite
     frecuencia_actualizacion: semanal
     enable_snapshots: true
     snapshot_strategy: check_cols
-    snapshot_check_cols: [etiqueta]
+    snapshot_check_cols: [orden_nro]
+
+  - nombre: programa_molienda
+    lakehouse: duckdb
+    descripcion: Programa de OT — Molienda SAG
+    formato: csv
+    ubicacion: /datos/csv/Molienda.csv
+    schema_columnas:
+      - {nombre: orden_nro, tipo: string, nullable: false}
+    frecuencia: {tipo: batch, cron: "0 8 * * 1"}
+    ingestion_pattern: overwrite
+    frecuencia_actualizacion: semanal
+    enable_snapshots: true
+    snapshot_strategy: check_cols
+    snapshot_check_cols: [orden_nro]
+
+  - nombre: programa_chancado_primario
+    lakehouse: duckdb
+    descripcion: Programa de OT — Prechancado y Nodo 3500
+    formato: csv
+    ubicacion: /datos/csv/Chancado_Primario.csv
+    schema_columnas:
+      - {nombre: orden_nro, tipo: string, nullable: false}
+    frecuencia: {tipo: batch, cron: "0 8 * * 1"}
+    ingestion_pattern: overwrite
+    frecuencia_actualizacion: semanal
+    enable_snapshots: true
+    snapshot_strategy: check_cols
+    snapshot_check_cols: [orden_nro]

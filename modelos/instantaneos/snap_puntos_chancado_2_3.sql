@@ -1,4 +1,4 @@
-{% snapshot snap_mediciones_cuaternario %}
+{% snapshot snap_puntos_chancado_2_3 %}
 {{
     config(
         unique_key='etiqueta',
@@ -6,5 +6,5 @@
         check_cols=['etiqueta']
     )
 }}
-SELECT * FROM {{ source('landing', 'mediciones_cuaternario') }}
+SELECT * FROM {{ source('landing', 'puntos_chancado_2_3') }}
 {% endsnapshot %}

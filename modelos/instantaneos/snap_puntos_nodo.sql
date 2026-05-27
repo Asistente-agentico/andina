@@ -1,4 +1,4 @@
-{% snapshot snap_mediciones_molienda_convencional %}
+{% snapshot snap_puntos_nodo %}
 {{
     config(
         unique_key='etiqueta',
@@ -6,5 +6,5 @@
         check_cols=['etiqueta']
     )
 }}
-SELECT * FROM {{ source('landing', 'mediciones_molienda_convencional') }}
+SELECT * FROM {{ source('landing', 'puntos_nodo') }}
 {% endsnapshot %}

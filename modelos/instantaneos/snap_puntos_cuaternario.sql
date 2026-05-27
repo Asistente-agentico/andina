@@ -1,4 +1,4 @@
-{% snapshot snap_mediciones_molienda_sag %}
+{% snapshot snap_puntos_cuaternario %}
 {{
     config(
         unique_key='etiqueta',
@@ -6,5 +6,5 @@
         check_cols=['etiqueta']
     )
 }}
-SELECT * FROM {{ source('landing', 'mediciones_molienda_sag') }}
+SELECT * FROM {{ source('landing', 'puntos_cuaternario') }}
 {% endsnapshot %}
