@@ -135,7 +135,7 @@ $composeExit = $LASTEXITCODE
 # El volumen minera_qdrant_mv sigue existiendo hasta que se llame down --volumes.
 Write-Host "  Copiando BDV Qdrant del volumen Docker al host..."
 New-Item -ItemType Directory -Force -Path $qdrantDir | Out-Null
-docker run --rm -v "minera_qdrant_mv:/source:ro" -v "${qdrantDir}:/dest" alpine sh -c "cp -r /source/. /dest/"
+docker run --rm -v "andina_qdrant_mv:/source:ro" -v "${qdrantDir}:/dest" alpine sh -c "cp -r /source/. /dest/"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "  ADVERTENCIA: copia de BDV Qdrant fallo (exit $LASTEXITCODE)." -ForegroundColor Yellow
 }

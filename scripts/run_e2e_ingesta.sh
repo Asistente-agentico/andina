@@ -141,7 +141,7 @@ COMPOSE_EXIT="${PIPESTATUS[0]}"
 # Copiar BDV Qdrant del volumen Docker al host via Alpine
 echo "  Copiando BDV Qdrant del volumen Docker al host..."
 mkdir -p "$QDRANT_DIR"
-docker run --rm -v "minera_qdrant_mv:/source:ro" -v "${QDRANT_DIR}:/dest" \
+docker run --rm -v "andina_qdrant_mv:/source:ro" -v "${QDRANT_DIR}:/dest" \
     alpine sh -c "cp -r /source/. /dest/" || \
     echo "  ADVERTENCIA: copia de BDV Qdrant fallo."
 

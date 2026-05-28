@@ -18,7 +18,7 @@
 #
 # Prerequisito: datos/minera.duckdb con seeds cargados (dbt seed ejecutado).
 
-suite: minera_ingesta
+suite: andina_ingesta
 version: "1.0"
 descripcion: "Pipeline M1: dbt + chunker → chunks_generados_dev.json validado por regla"
 
