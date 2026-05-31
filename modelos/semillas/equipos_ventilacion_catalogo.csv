@@ -1,0 +1,143 @@
+ubicacion_tecnica,equipo_denom,tipo_equipo,familia_equipo,sector,planta_canon,orden_sap_ejemplo,fuente
+ANCO-CS-CST-SCP-CDS01-MEC,Colector Polvo Seco Same,CDS,abatidor_polvo,CST,Chancado 2° y 3°,110404320,Programa Semana 21
+ANCO-CS-CST-SCP-CDS02-MEC,Colector Polvo Seco Cola M2,CDS,abatidor_polvo,CST,Chancado 2° y 3°,110404322,Programa Semana 21
+ANCO-CS-CST-SCP-HDP01-MEC,Humectador Alimentador M4A,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110456202,Programa Semana 21
+ANCO-CS-CST-SCP-HDP02-MEC,Humectador Alimentador M4B,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110456203,Programa Semana 21
+ANCO-CS-CST-SCF-PTV01-MEC,Porton Vent N 2 Tnl Conex CHF - 2  3,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110415519,Programa Semana 21
+ANCO-CS-CST-SCP-HDP03-MEC,Humectador Alimentador M1 M2,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110462236,Programa Semana 21
+ANCO-CS-CST-SCP-CDP01-MEC,Colector de Polvo CTR N°52,CDP,abatidor_polvo,CST,Chancado 2° y 3°,110409382,Programa Semana 21
+ANCO-CS-CST-SVE-VEX01-MEC,Ventilador Extractor N 1,VEX,renovacion_aire,CST,Chancado 2° y 3°,110431571,Programa Semana 21
+ANCO-CS-CST-SCF-PUV01-MEC,Puerta Ventilacion N 1 Alimentador M4A,PUV,control_flujo_aire,CST,Chancado 2° y 3°,110459023,Programa Semana 21
+ANCO-CS-CST-SCF-PUV02-MEC,Puerta Ventilacion N 2 Alimentador M4A,PUV,control_flujo_aire,CST,Chancado 2° y 3°,110459024,Programa Semana 21
+ANCO-CS-CST-SCF-PTV02-MEC,Porton Vent N 3 Tnl Conex CHF - 2  3,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110415520,Programa Semana 21
+ANCO-CS-CST-SCF-DAM01-MEC,Damper 5 techo caverna,DAM,control_flujo_aire,CST,Chancado 2° y 3°,110421182,Programa Semana 21
+ANCO-CS-CST-SCF-PTV03-MEC,Porton Vent N 4 Tnl Conex CHF - 2  3,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110422491,Programa Semana 21
+ANCO-CS-CST-SCF-PTV04-MEC,Portón Ventilación Nº9,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110451891,Programa Semana 21
+ANCO-CS-CST-SCF-PTV05-MEC,Portón Ventilación N°7,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110451890,Programa Semana 21
+ANCO-CS-CST-SCF-PTV06-MEC,Portón Ventilación Nº1,PTV,control_flujo_aire,CST,Chancado 2° y 3°,110461655,Programa Semana 21
+ANCO-CS-CST-SCP-CDH01-MEC,Colector Polvo Humedo S13-1,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110404317,Programa Semana 21
+ANCO-CS-CST-SCP-HDP04-MEC,Humectador Correa 7B,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447207,Programa Semana 21
+ANCO-CS-CST-SCP-HDP05-MEC,Humectador Correa 7C,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447208,Programa Semana 21
+ANCO-CS-CST-SCP-HDP06-MEC,Humectador Correa 7E,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447212,Programa Semana 21
+ANCO-CS-CST-SCP-CDH02-MEC,Colector Polvo Húmedo S11-1,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110404313,Programa Semana 21
+ANCO-CS-CST-SCP-CDH03-MEC,Colector Polvo Húmedo S12-1,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110404315,Programa Semana 21
+ANCO-CS-CST-SCP-HDP07-MEC,Humectador Correa 8C 8D,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447215,Programa Semana 21
+ANCO-CS-CST-SCP-HDP08-MEC,Humectador Correa 8D,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447220,Programa Semana 21
+ANCO-CS-CST-SCP-HDP09-MEC,Humectador Correa 8E 8F,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447216,Programa Semana 21
+ANCO-CS-CST-SCP-HDP10-MEC,Humectador Correa 7G 7H,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110447217,Programa Semana 21
+ANCO-CS-CST-SCP-HDP11-MEC,Humectador Correa 7A,HDP,abatidor_polvo,CST,Chancado 2° y 3°,110451987,Programa Semana 21
+ANCO-CS-CST-SCP-CDH04-MEC,Colector Polvo Húmedo N 1,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110287633,Programa Semana 21
+ANCO-CS-CST-SCP-EPZ01-MEC,Presurizador Oficina Mecanicos,EPZ,abatidor_polvo,CST,Chancado 2° y 3°,110338943,Programa Semana 21
+ANCO-CS-CST-SCP-EPZ02-MEC,Presurizador Panel,EPZ,abatidor_polvo,CST,Chancado 2° y 3°,110409380,Programa Semana 21
+ANCO-CS-CST-SCP-CDH05-MEC,Colector Polvo Humedo N 9,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110420823,Programa Semana 21
+ANCO-CS-CST-SCP-CDH06-MEC,Colector Polvo Humedo N 3,CDH,abatidor_polvo,CST,Chancado 2° y 3°,110420822,Programa Semana 21
+ANCO-MS-CST-SVE-VEX01-MEC,Ventilador Ext N2 Sala Compresores,VEX,renovacion_aire,CST,Molienda SAG,110439448,Programa Semana 21
+ANCO-MS-CST-SVE-VEX02-MEC,Ventilador Ext N4 Sala Compresores,VEX,renovacion_aire,CST,Molienda SAG,110444452,Programa Semana 21
+ANCO-MS-CST-SVE-VEX03-MEC,Ventilador Extr Vahos N°1 Estanque Trasp,VEX,renovacion_aire,CST,Molienda SAG,110439453,Programa Semana 21
+ANCO-MS-CST-SVE-VEX04-MEC,Ventilador Extrac  N 1 Techo MUI,VEX,renovacion_aire,CST,Molienda SAG,110420818,Programa Semana 21
+ANCO-MS-CST-SCF-PTV01-MEC,Portón Ventilación Manual N 17,PTV,control_flujo_aire,CST,Molienda SAG,110431567,Programa Semana 21
+ANCO-MS-CST-SCF-PTV02-MEC,Portón Ventilación Manual N 18,PTV,control_flujo_aire,CST,Molienda SAG,110431577,Programa Semana 21
+ANCO-MS-CST-SCF-PTV03-MEC,Portón Ventilación Manual N 19,PTV,control_flujo_aire,CST,Molienda SAG,110426417,Programa Semana 21
+ANCO-MS-CST-SVE-VEX05-MEC,Ventilador Ext N3 Sala Compresores,VEX,renovacion_aire,CST,Molienda SAG,110444451,Programa Semana 21
+ANCO-MC-CST-SCP-EPZ01-MEC,Presurizador Taller Mec MCO,EPZ,abatidor_polvo,CST,Molienda Convencional,110338968,Programa Semana 21
+ANCO-MS-CST-SCP-EPZ01-MEC,Presurizador N°1 Edificio Gerencia,EPZ,abatidor_polvo,CST,Molienda SAG,110338962,Programa Semana 21
+ANCO-MS-CST-SCP-EPZ02-MEC,Presurizador N°2 Edificio Gerencia,EPZ,abatidor_polvo,CST,Molienda SAG,110467828,Programa Semana 21
+ANCO-MS-CST-SCP-EPZ03-MEC,Presurizador N°3 Edificio Gerencia,EPZ,abatidor_polvo,CST,Molienda SAG,110338964,Programa Semana 21
+ANCO-MS-CST-SCP-EPZ04-MEC,Presurizador N°4 Edificio Gerencia,EPZ,abatidor_polvo,CST,Molienda SAG,110338966,Programa Semana 21
+ANCO-MS-CST-SVE-VIN01-MEC,Ventilador Iny N 1 Sala Eléctrica SAG,VIN,renovacion_aire,CST,Molienda SAG,110415142,Programa Semana 21
+ANCO-MS-CST-SCF-PTV04-MEC,Porton N 3 Acc Principal Panel Sag,PTV,control_flujo_aire,CST,Molienda SAG,110404319,Programa Semana 21
+ANCO-MS-CST-SVE-VIN02-MEC,Ventilador Inyector N 2 Caverna SAG,VIN,renovacion_aire,CST,Molienda SAG,110420775,Programa Semana 21
+ANCO-MS-CST-SCF-PUV01-MEC,Puerta N 1 Tnl Conexion con Planta Sag,PUV,control_flujo_aire,CST,Molienda SAG,110379432,Programa Semana 21
+ANCO-MS-CST-SCF-PUV02-MEC,Puerta N 2 Tnl Conexion con Planta Sag,PUV,control_flujo_aire,CST,Molienda SAG,110379433,Programa Semana 21
+ANCO-MS-CST-SCP-HDP01-MEC,Humectador  Polvo Correa A9,HDP,abatidor_polvo,CST,Molienda SAG,110317861,Programa Semana 21
+ANCO-MS-CST-SCP-HDP02-MEC,Humectador Polvo Correa A14,HDP,abatidor_polvo,CST,Molienda SAG,110322485,Programa Semana 21
+ANCO-MS-CST-SCP-HDP03-MEC,Humectador Polvo Correa A13,HDP,abatidor_polvo,CST,Molienda SAG,110322484,Programa Semana 21
+ANCO-MS-CST-SCP-HDP04-MEC,Humectador Polvo Correa A12,HDP,abatidor_polvo,CST,Molienda SAG,110322483,Programa Semana 21
+ANCO-MS-CST-SCP-HDP05-MEC,Humectador Polvo Correa A15,HDP,abatidor_polvo,CST,Molienda SAG,110322486,Programa Semana 21
+ANCO-MS-CST-SCP-HDP06-MEC,Humectador Polvo Correa A17,HDP,abatidor_polvo,CST,Molienda SAG,110317800,Programa Semana 21
+ANCO-MS-CST-SCP-HDP07-MEC,Humectador Polvo Alimentador CT A8 01,HDP,abatidor_polvo,CST,Molienda SAG,110451985,Programa Semana 21
+ANCO-MS-CST-SCP-HDP08-MEC,Humectador Polvo Alimentador CT A8 02,HDP,abatidor_polvo,CST,Molienda SAG,110451986,Programa Semana 21
+ANCO-MS-CST-SCP-HDP09-MEC,Humectador Polvo Alimentador CT A8 03,HDP,abatidor_polvo,CST,Molienda SAG,110322487,Programa Semana 21
+ANCO-MS-CST-SCP-HDP10-MEC,Humectador Polvo Alimentador CT A8 04,HDP,abatidor_polvo,CST,Molienda SAG,110322488,Programa Semana 21
+ANCO-MC-CST-SCP-EPZ02-MEC,Presurizacion N 1 SEE Molino MU2,EPZ,abatidor_polvo,CST,Molienda Convencional,110276841,Programa Semana 21
+ANCO-MC-CST-SCP-EPZ03-MEC,Presurizacion N 2 SEE Molino MU2,EPZ,abatidor_polvo,CST,Molienda Convencional,110276843,Programa Semana 21
+ANCO-MS-CST-SCF-PTV05-MEC,Porton N 11 Acc alimentadores M8 ABC,PTV,control_flujo_aire,CST,Molienda SAG,110404312,Programa Semana 21
+ANCO-MS-CST-SCF-PTV06-MEC,Porton N 13 Acceso Descarga Tolva Bolas,PTV,control_flujo_aire,CST,Molienda SAG,110409381,Programa Semana 21
+ANCO-PC-CST-SCP-EPZ01-MEC,Presurizador SEE-D,EPZ,abatidor_polvo,CST,Prechancado,110415518,Programa Semana 21
+ANCO-PC-CST-SCP-EPZ02-MEC,Presurizador SEE-D1,EPZ,abatidor_polvo,CST,Prechancado,110404311,Programa Semana 21
+ANCO-PC-CST-SCF-PTV01-MEC,Porton Incendio Tnl Inyeccion  N 2,PTV,control_flujo_aire,CST,Prechancado,110404318,Programa Semana 21
+ANCO-PC-CST-SCP-CDP01-MEC,Correa 54,CDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCP-CDP02-MEC,Cola Correa 52,CDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SVE-VEX01-MEC,Extractores Transferencia 2,VEX,renovacion_aire,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCF-PTV02-MEC,Portón 4,PTV,control_flujo_aire,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCF-PTV03-MEC,Portón 5,PTV,control_flujo_aire,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCF-PTV04-MEC,Portón 6,PTV,control_flujo_aire,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCF-PTV05-MEC,Portón 7,PTV,control_flujo_aire,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCP-HDP01-MEC,Humectador Correa 52,HDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCP-HDP02-MEC,Humectador Correa 54,HDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCP-HDP03-MEC,Humectador Cola Correa 55,HDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-PC-CST-SCP-HDP04-MEC,Humectador Correa 57,HDP,abatidor_polvo,CST,Prechancado,,Puntos Críticos · Prechancado
+ANCO-CS-CST-SCP-CDP02-MEC,Cola Correa M2,CDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCP-CDP03-MEC,Colector 15000 m3/h,CDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCP-CDP04-MEC,Colector 36000 m3/h,CDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SVE-VEX02-MEC,Extractor 8,VEX,renovacion_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SVE-VEX03-MEC,Extractor 9,VEX,renovacion_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SVE-VIN01-MEC,Inyector 3,VIN,renovacion_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SVE-VIN02-MEC,Inyector 4,VIN,renovacion_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV07-MEC,Portón 1,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV08-MEC,Portón 2,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV09-MEC,Portón 5,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV10-MEC,Portón 6,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV11-MEC,Portón 7,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCF-PTV12-MEC,Portón 8,PTV,control_flujo_aire,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCP-HDP12-MEC,Alimentador M4A,HDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCP-HDP13-MEC,Alimentador M4B,HDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CS-CST-SCP-HDP14-MEC,Alimentador M1 - Correa M2,HDP,abatidor_polvo,CST,Chancado 2° y 3°,,Puntos Críticos · 2° y 3°
+ANCO-CT-CST-SCP-CDP01-MEC,Colector S 11-1,CDP,abatidor_polvo,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SCP-CDP02-MEC,Colector S 11-2,CDP,abatidor_polvo,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SCP-CDP03-MEC,Colector S 12-1,CDP,abatidor_polvo,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SCP-CDP04-MEC,Colector S 12-2,CDP,abatidor_polvo,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SVE-VIN01-MEC,Ventiladores Inyectores Pique Molinos,VIN,renovacion_aire,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SCF-PTV01-MEC,Portones Manuales acceso pique servicio,PTV,control_flujo_aire,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CT-CST-SCF-PTV02-MEC,Portón túnel acceso a chancado secundario terciario,PTV,control_flujo_aire,CST,Chancado Fino 3°,,Puntos Críticos · Terciario
+ANCO-CC-CST-SCP-CDH01-MEC,Colector Húmedo 9,CDH,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-CDH02-MEC,Colector Húmedo 10,CDH,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-CDP01-MEC,Colector S 13-1,CDP,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-CDP02-MEC,Colector S 13-2,CDP,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SVE-VEX01-MEC,Extractores Nuevos,VEX,renovacion_aire,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SVE-VEX02-MEC,Extractor S16 Chimenea correa 7D,VEX,renovacion_aire,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SVE-VEX03-MEC,"Extractores 1,2 y 3 Correa 8C",VEX,renovacion_aire,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-CDP03-MEC,Portón acceso colectores S13,CDP,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-HDP01-MEC,Humectador Cola Correa 7C,HDP,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-CC-CST-SCP-HDP02-MEC,Humectador Correa 8C,HDP,abatidor_polvo,CST,Chancado Fino 4°,,Puntos Críticos · Cuaternario
+ANCO-MS-CST-SVE-VEX06-MEC,VI1 Inyección SSE SAG,VEX,renovacion_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SVE-VEX07-MEC,VI2 Inyección Nave SAG,VEX,renovacion_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SVE-VEX08-MEC,VE1 Extracción SSE SAG,VEX,renovacion_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SVE-VEX09-MEC,VE2 Extracción Nave SAG,VEX,renovacion_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SVE-VEX10-MEC,VE3 Extracción Pebbles,VEX,renovacion_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCF-PTV07-MEC,Portón N°6 conexión Pebbles a pique Molinos,PTV,control_flujo_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCF-PTV08-MEC,Portón  N°7 conexión Pebbles a pique Molinos,PTV,control_flujo_aire,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCP-SDP01-MEC,Supresores alimentadores correa 1,SDP,abatidor_polvo,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCP-SDP02-MEC,Supresores alimentadores correa 2,SDP,abatidor_polvo,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCP-SDP03-MEC,Supresores alimentadores correa 3,SDP,abatidor_polvo,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MS-CST-SCP-SDP04-MEC,Supresores alimentadores correa 4,SDP,abatidor_polvo,CST,Molienda SAG,,Puntos Críticos · Molienda Sag
+ANCO-MC-CST-SVE-VEX01-MEC,Extractor planta cal,VEX,renovacion_aire,CST,Molienda Convencional,,Puntos Críticos · Molienda Convencional
+ANCO-MC-CST-SCP-HDP01-MEC,Correa 10D,HDP,abatidor_polvo,CST,Molienda Convencional,,Puntos Críticos · Molienda Convencional
+ANCO-MC-CST-SCP-HDP02-MEC,Correa 10E,HDP,abatidor_polvo,CST,Molienda Convencional,,Puntos Críticos · Molienda Convencional
+ANCO-C1-CST-SCP-CDP01-MEC,Correa 1T,CDP,abatidor_polvo,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C1-CST-SCP-CDP02-MEC,Correa 3T,CDP,abatidor_polvo,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C1-CST-SCF-PTV01-MEC,Acceso Rai,PTV,control_flujo_aire,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C1-CST-SCP-HDP01-MEC,Correa 1T,HDP,abatidor_polvo,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C1-CST-SCP-HDP02-MEC,Correa 2T,HDP,abatidor_polvo,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C1-CST-SCP-HDP03-MEC,Correa 3T,HDP,abatidor_polvo,CST,CDM Linea 1,,Puntos Críticos · CDM (1)
+ANCO-C2-CST-SVE-VIN01-MEC,Inyector 1 portal castro,VIN,renovacion_aire,CST,CDM Linea 2,,Puntos Críticos · CDM (2)
+ANCO-C2-CST-SVE-VIN02-MEC,Inyector 2 portal castro,VIN,renovacion_aire,CST,CDM Linea 2,,Puntos Críticos · CDM (2)
+ANCO-C2-CST-SCF-PTV01-MEC,Portón 6,PTV,control_flujo_aire,CST,CDM Linea 2,,Puntos Críticos · CDM (2)
+ANCO-C2-CST-SCF-PTV02-MEC,Portón 7,PTV,control_flujo_aire,CST,CDM Linea 2,,Puntos Críticos · CDM (2)
+ANCO-ND-CST-SVE-VIN01-MEC,Ventilador Inyector 4,VIN,renovacion_aire,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SVE-VIN02-MEC,Ventilador Inyector 5,VIN,renovacion_aire,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SVE-VEX01-MEC,Ventilador Extractor 6,VEX,renovacion_aire,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SVE-VEX02-MEC,Ventilador Extractor 7,VEX,renovacion_aire,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SCP-SDP01-MEC,Olla chancador,SDP,abatidor_polvo,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SCP-CDP01-MEC,Colector correa Sacrificio,CDP,abatidor_polvo,CST,Nodo 3500,,Puntos Críticos · Nodo
+ANCO-ND-CST-SCP-CDP02-MEC,Colector correa Regenerativa (4to piso),CDP,abatidor_polvo,CST,Nodo 3500,,Puntos Críticos · Nodo

@@ -1,11 +1,12 @@
 tipo_equipo_codigo,nombre,familia
-SCP_ABATIDOR_POLVO,Abatidor de polvo,abatimiento
-SVE_RENOVACION_AIRE,Sistema renovacion aire,renovacion
-HDP,Humectador de polvo,abatimiento
-CHP,Captador de polvo,abatimiento
-EPZ,Presurizador,renovacion
-FNI,Ventilador inyector,renovacion
-FNE,Ventilador extractor,renovacion
-CDP_SECO,Colector polvo seco,abatimiento
-CDP_HUMEDO,Colector polvo humedo,abatimiento
-SPP,Supresor de polvo,abatimiento
+HDP,Humectador de polvo,abatidor_polvo
+SDP,Supresor de polvo,abatidor_polvo
+CDH,Colector de polvo humedo,abatidor_polvo
+CDS,Colector de polvo seco,abatidor_polvo
+CDP,Colector de polvo,abatidor_polvo
+EPZ,Presurizador,abatidor_polvo
+VEX,Ventilador extractor,renovacion_aire
+VIN,Ventilador inyector,renovacion_aire
+PTV,Porton de ventilacion,control_flujo_aire
+PUV,Puerta de ventilacion,control_flujo_aire
+DAM,Damper,control_flujo_aire
