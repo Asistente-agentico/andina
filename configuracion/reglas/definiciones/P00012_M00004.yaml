@@ -10,7 +10,7 @@ regla:
     descripcion: "¿Qué máquinas fueron medidas en la semana X?"
 
   chunk_id:
-    columns: [maquina_gen_nombre, anio, semana_nro]
+    columns: [punto_nro, anio, semana_nro]
     separator: "_"
 
   privacidad:
