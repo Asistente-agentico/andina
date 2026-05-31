@@ -10,7 +10,7 @@ regla:
     descripcion: "¿Cuál es la planta con los puntos de medición más bajos?"
 
   chunk_id:
-    columns: [planta_canon, anio, semana_nro]
+    columns: [planta_canon]
     separator: "_"
 
   privacidad:
