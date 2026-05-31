@@ -91,7 +91,19 @@ planta AS (
     FROM {{ ref('silver_relacion_planta_tipo_equipo') }} lpt
     LEFT JOIN {{ ref('silver_detalle_planta') }} spd
         ON {{ huella_registro(['lpt.planta_canon']) }} = spd.huella_registro
-       AND spd.valid_to IS NULL
+),
+
+punto AS (
+    -- Puente máquina de control -> punto(s) que cubre (mantención en contexto del punto).
+    -- Una máquina puede cubrir varios puntos (fan-out intencional).
+    SELECT
+        lpmc.ent_maquina_control_polvo_hk,
+        lpmc.punto_nro,
+        spm.nombre_punto
+    FROM {{ ref('silver_relacion_punto_maqctrl') }} lpmc
+    LEFT JOIN {{ ref('silver_detalle_punto_medicion') }} spm
+        ON lpmc.ent_punto_medicion_hk = spm.huella_registro
+       AND spm.valid_to IS NULL
 )
 
 SELECT
@@ -113,12 +125,16 @@ SELECT
     o.hh_reales,
     o.personal_real,
     o.duracion_real,
+    o.cumpl_prog,
     o.adherencia_prog,
     o.dia_ejecutado,
     r.responsable_nombre,
     r.responsable_tipo,
+    pt.punto_nro,
+    pt.nombre_punto,
     'mantencion'::text   AS ambito
 FROM ot o
 LEFT JOIN responsable r ON o.ent_orden_trabajo_hk         = r.ent_orden_trabajo_hk
 LEFT JOIN maqctrl     mc ON o.ent_maquina_control_polvo_hk = mc.ent_maquina_control_polvo_hk
 LEFT JOIN planta      pl ON mc.tipo_equipo                 = pl.tipo_equipo_codigo
+LEFT JOIN punto pt ON o.ent_maquina_control_polvo_hk = pt.ent_maquina_control_polvo_hk
