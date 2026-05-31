@@ -10,7 +10,7 @@ regla:
     descripcion: "¿Cuál de todas las plantas tiene la tendencia de crecer en polución alto y cuáles son esos puntos de medición?"
 
   chunk_id:
-    columns: [planta_canon, punto_nro, anio]
+    columns: [planta_canon, punto_nro]
     separator: "_"
 
   privacidad:
