@@ -12,6 +12,8 @@
       L_PUNTO_PLANTA                              (planta canónica)
       S_PUNTO_DESCR                               (nombre del punto)
       L_PUNTO_MAQGEN + S_MAQGEN_DESCR             (máquina generadora — familia A)
+      L_PUNTO_COMPONENTE + S_COMPONENTE_DESCR + S_COMPONENTE_ESTADO
+                                                  (chute/pieza específica que mide el punto y su estado — familia A)
       L_CONDICION_OBSERVADA + S_CONDICION_ESTADO  (condiciones registradas en el punto)
       S_CONDICION_TIPO_DESCR                      (familia causal y peso por defecto)
       L_CONDICION_PROBLEMA + S_PROBLEMA_DESCR     (problema raíz al que apunta la condición)
@@ -57,18 +59,34 @@ planta AS (
     FROM {{ ref('silver_relacion_punto_planta') }} lpp
 ),
 
+-- Componente estructural (chute/pieza) que mide el punto + su estado semanal.
+-- Permite distinguir dos puntos sobre la misma correa que miden chutes distintos.
+componente AS (
+    SELECT
+        lpc.ent_punto_medicion_hk,
+        lpc.componente_codigo,
+        sdc.componente_nombre,
+        sdc.tipo_componente,
+        sce.estado_actual            AS estado_componente
+    FROM {{ ref('silver_relacion_punto_componente') }} lpc
+    LEFT JOIN {{ ref('silver_detalle_componente') }} sdc
+        ON lpc.ent_componente_estructural_hk = sdc.huella_registro
+       AND sdc.valid_to IS NULL
+    LEFT JOIN {{ ref('silver_detalle_componente_estado') }} sce
+        ON lpc.ent_componente_estructural_hk = sce.huella_registro
+       AND sce.valid_to IS NULL
+),
+
 condicion AS (
     SELECT
         lco.ent_punto_medicion_hk,
         lco.ent_semana_hk,
         lco.condicion_codigo,
         stc.condicion_nombre,
-        stc.familia_causa,
+        spr.familia_causa,
         stc.peso_causa_default,
-        sce.estado_valor,
         sce.severidad,
-        spr.problema_raiz_nombre,
-        spr.tipo_intervencion        AS tipo_equipo_recomendado
+        spr.problema_raiz_nombre
     FROM {{ ref('silver_relacion_condicion_observada') }} lco
     LEFT JOIN {{ ref('silver_detalle_condicion_estado') }} sce
         ON lco.huella_registro = sce.huella_registro
@@ -124,11 +142,15 @@ SELECT
     'condicion'::text               AS tipo_causa,
     c.condicion_nombre              AS causa_descripcion,
     c.condicion_nombre,
-    c.estado_valor,
+    c.condicion_codigo,
     c.severidad,
     c.problema_raiz_nombre,
     c.familia_causa,
-    c.tipo_equipo_recomendado,
+    -- Enriquecimiento con el componente estructural (chute/pieza) — Opción A
+    cmp.componente_codigo,
+    cmp.componente_nombre,
+    cmp.tipo_componente,
+    cmp.estado_componente,
     NULL::text                      AS equipo_denom,
     NULL::text                      AS tipo_equipo,
     NULL::text                      AS familia_equipo,
@@ -139,8 +161,9 @@ SELECT
     CASE WHEN c.peso_causa_default >= 0.80 THEN true ELSE false END AS es_causa_principal,
     'cruzado'::text                 AS ambito
 FROM medicion m
-LEFT JOIN punto      pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
-LEFT JOIN planta     p  ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
+LEFT JOIN punto      pt  ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
+LEFT JOIN planta     p   ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
+LEFT JOIN componente cmp ON m.ent_punto_medicion_hk = cmp.ent_punto_medicion_hk
 INNER JOIN condicion c
        ON m.ent_punto_medicion_hk = c.ent_punto_medicion_hk
       AND m.ent_semana_hk         = c.ent_semana_hk
@@ -158,11 +181,15 @@ SELECT
     'mantencion'::text              AS tipo_causa,
     o.ot_texto_breve                AS causa_descripcion,
     NULL::text                      AS condicion_nombre,
-    NULL::text                      AS estado_valor,
+    NULL::text                      AS condicion_codigo,
     NULL::text                      AS severidad,
     'Máquina de control detenida'::text AS problema_raiz_nombre,
     'B'::text                       AS familia_causa,
-    o.tipo_equipo                   AS tipo_equipo_recomendado,
+    -- Columnas de componente: no aplican a la familia B (OT)
+    NULL::text                      AS componente_codigo,
+    NULL::text                      AS componente_nombre,
+    NULL::text                      AS tipo_componente,
+    NULL::text                      AS estado_componente,
     o.equipo_denom,
     o.tipo_equipo,
     o.familia_equipo,

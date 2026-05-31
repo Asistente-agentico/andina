@@ -1,6 +1,8 @@
 -- P00008 — ¿Por qué la máquina X no tuvo mantención?
 -- Devuelve el motivo de no-ejecución para una máquina específica (familia B del modelo causal V1).
 SELECT
+    cr.punto_nro,
+    cr.nombre_punto,
     cr.equipo_denom,
     cr.tipo_equipo,
     cr.familia_equipo,

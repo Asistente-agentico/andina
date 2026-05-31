@@ -10,7 +10,7 @@ regla:
     descripcion: "¿Por qué el punto X tiene altos niveles de medición?"
 
   chunk_id:
-    columns: [punto_nro, anio, semana_nro, condicion_nombre]
+    columns: [punto_nro, anio, semana_nro, tipo_causa, ot_relacionada, condicion_codigo]
     separator: "_"
 
   privacidad:

@@ -17,19 +17,15 @@ WITH src AS (
         condicion_codigo,
         anio,
         semana_nro,
-        estado_valor,
-        severidad,
-        observaciones
+        severidad
     FROM {{ ref('condiciones_observadas') }}
 ),
 
 con_hash AS (
     SELECT
         {{ huella_registro(['punto_nro', 'condicion_codigo', 'anio', 'semana_nro']) }}    AS huella_registro,
-        {{ huella_contenido(['estado_valor', 'severidad', 'observaciones']) }}              AS _huella_contenido,
-        estado_valor,
+        {{ huella_contenido(['severidad']) }}                                               AS _huella_contenido,
         severidad,
-        observaciones,
         current_timestamp                       AS valid_from,
         NULL::TIMESTAMP                         AS valid_to,
         1                                       AS version_seq,

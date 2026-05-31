@@ -13,8 +13,7 @@
 WITH src AS (
     SELECT
         condicion_codigo,
-        condicion_nombre,
-        familia_causa,
+        nombre              AS condicion_nombre,
         peso_causa_default
     FROM {{ ref('condiciones_tipo') }}
 ),
@@ -22,9 +21,8 @@ WITH src AS (
 con_hash AS (
     SELECT
         {{ huella_registro(['condicion_codigo']) }}                                    AS huella_registro,
-        {{ huella_contenido(['condicion_nombre', 'familia_causa', 'peso_causa_default']) }} AS _huella_contenido,
+        {{ huella_contenido(['condicion_nombre', 'peso_causa_default']) }} AS _huella_contenido,
         condicion_nombre,
-        familia_causa,
         peso_causa_default,
         current_timestamp                AS valid_from,
         NULL::TIMESTAMP                  AS valid_to,

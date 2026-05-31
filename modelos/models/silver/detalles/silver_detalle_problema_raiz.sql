@@ -13,19 +13,17 @@
 WITH src AS (
     SELECT
         problema_raiz_codigo,
-        problema_raiz_nombre,
-        familia_causa,
-        tipo_intervencion
+        nombre              AS problema_raiz_nombre,
+        familia             AS familia_causa
     FROM {{ ref('problemas_raiz') }}
 ),
 
 con_hash AS (
     SELECT
         {{ huella_registro(['problema_raiz_codigo']) }}                                          AS huella_registro,
-        {{ huella_contenido(['problema_raiz_nombre', 'familia_causa', 'tipo_intervencion']) }}   AS _huella_contenido,
+        {{ huella_contenido(['problema_raiz_nombre', 'familia_causa']) }}   AS _huella_contenido,
         problema_raiz_nombre,
         familia_causa,
-        tipo_intervencion,
         current_timestamp                AS valid_from,
         NULL::TIMESTAMP                  AS valid_to,
         1                                AS version_seq,
