@@ -73,6 +73,7 @@ SELECT
     s.fecha_inicio_semana,
     s.fecha_fin_semana,
     m.concentracion_mg_m3,
+    m.estado,
     'fiscalizacion'::text   AS ambito
 FROM medicion m
 LEFT JOIN punto  pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk

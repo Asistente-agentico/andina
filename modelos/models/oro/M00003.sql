@@ -8,11 +8,11 @@
     Ámbito: fiscalizacion (denormalizado como literal).
 
     Construcción desde silver:
-      L_MEDICION + S_MEDICION_VALOR     (fecha, hora, estado, motivo)
-      L_PUNTO_PLANTA + S_PLANTA_DESCR   (planta canónica)
-      S_PUNTO_DESCR                     (nombre del punto)
-      L_OT_RESPONSABLE + S_PERSONA_DESCR (responsable de la medición — operador y técnico)
-      S_SEMANA_DESCR                    (fecha calendario)
+      L_MEDICION + S_MEDICION_VALOR        (fecha, hora, estado, motivo)
+      L_PUNTO_PLANTA + S_PLANTA_DESCR      (planta canónica)
+      S_PUNTO_DESCR                        (nombre del punto)
+      L_MEDICION_PERSONA + S_PERSONA_DESCR (responsables: operador de panel y técnico en higiene)
+      S_SEMANA_DESCR                       (fecha calendario)
 
     Los filtros particulares de cada pregunta (por punto, por planta, estado='no_medido') viven
     en configuracion/reglas/consultas/.
@@ -67,23 +67,19 @@ semana AS (
     WHERE ss.valid_to IS NULL
 ),
 
+-- Responsables resueltos vía el link rel_medicion_persona (operador / técnico por rol).
 responsables AS (
     SELECT
-        m.medicion_hk,
-        MAX(CASE WHEN sp.tipo_persona = 'operador' THEN sp.nombre_completo END) AS operador_panel,
-        MAX(CASE WHEN sp.tipo_persona = 'tecnico'  THEN sp.nombre_completo END) AS tecnico_higiene
-    FROM medicion m
-    LEFT JOIN {{ ref('silver_relacion_ot_responsable') }} lor
-        ON lor.orden_nro IS NULL  -- placeholder: medición no asocia OT, ver TODO abajo
+        lmp.ent_punto_medicion_hk,
+        lmp.ent_semana_hk,
+        MAX(CASE WHEN lmp.rol = 'operador' THEN sp.nombre_completo END) AS operador_panel,
+        MAX(CASE WHEN lmp.rol = 'tecnico'  THEN sp.nombre_completo END) AS tecnico_higiene
+    FROM {{ ref('silver_relacion_medicion_persona') }} lmp
     LEFT JOIN {{ ref('silver_detalle_persona') }} sp
-        ON lor.ent_persona_hk = sp.huella_registro
+        ON lmp.ent_persona_hk = sp.huella_registro
        AND sp.valid_to IS NULL
-    GROUP BY m.medicion_hk
+    GROUP BY lmp.ent_punto_medicion_hk, lmp.ent_semana_hk
 )
-
--- TODO: el modelo actual no tiene un link directo "medición ↔ persona".
--- Para resolver operador/técnico cuando exista la fuente, agregar un link L_MEDICION_RESPONSABLE
--- o resolver vía bronce_mediciones.operador_alias / tecnico_alias contra personas_alias.
 
 SELECT
     p.planta_canon,
@@ -103,7 +99,8 @@ SELECT
     r.tecnico_higiene,
     'fiscalizacion'::text   AS ambito
 FROM medicion m
-LEFT JOIN punto       pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
-LEFT JOIN planta      p  ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
-LEFT JOIN semana      s  ON m.ent_semana_hk         = s.ent_semana_hk
-LEFT JOIN responsables r ON m.medicion_hk           = r.medicion_hk
+LEFT JOIN punto        pt ON m.ent_punto_medicion_hk = pt.ent_punto_medicion_hk
+LEFT JOIN planta       p  ON m.ent_punto_medicion_hk = p.ent_punto_medicion_hk
+LEFT JOIN semana       s  ON m.ent_semana_hk         = s.ent_semana_hk
+LEFT JOIN responsables r  ON m.ent_punto_medicion_hk = r.ent_punto_medicion_hk
+                         AND m.ent_semana_hk         = r.ent_semana_hk
